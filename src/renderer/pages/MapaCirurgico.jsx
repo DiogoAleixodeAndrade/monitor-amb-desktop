@@ -10,12 +10,12 @@ export default function MapaCirurgico() {
 
   return (
     <AppShell
-      title="Sala de Mapa Cirúrgico"
-      subtitle="Controle dos pacientes encaminhados para programação cirúrgica"
+      title="Mapa 24h"
+      subtitle="Controle dos pacientes encaminhados para a sala de Mapa 24h"
     >
       <QueueBoard
-        title="Pacientes aguardando mapa cirúrgico"
-        subtitle="Fila exclusiva da sala de mapa cirúrgico."
+        title="Pacientes aguardando Mapa 24h"
+        subtitle="Fila exclusiva do setor de Mapa 24h."
         patients={patients}
       />
     </AppShell>

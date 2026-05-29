@@ -179,7 +179,7 @@ export const mockQueue = [
     statusAtendimento: 'AGUARDANDO',
     idMedicoDestino: 101,
     nomeMedicoDestino: 'João Carlos',
-    especialidade: 'Cirurgia Cardiovascular',
+    especialidade: 'Mapa 24h',
     prioritario: false,
     tipoPrioridade: '',
     obsPrioridade: '',

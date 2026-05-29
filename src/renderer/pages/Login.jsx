@@ -119,7 +119,7 @@ export default function Login({ appInfo }) {
             <span>recepcao / 123</span>
             <span>joao.silva / 123</span>
             <span>painel / 123</span>
-            <span>mapa.cirurgico / 123</span>
+            <span>mapa.24h / 123</span>
           </div>
 
           <div className="login-footer">

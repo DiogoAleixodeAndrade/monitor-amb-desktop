@@ -85,8 +85,8 @@ export const mockUsers = [
   },
   {
   id: 10,
-  nome: 'Sala de Mapa Cirúrgico',
-  usuario: 'mapa.cirurgico',
+  nome: 'Mapa 24h',
+  usuario: 'mapa.24h',
   senha: '123',
   perfil: 'MAPA_CIRURGICO',
   ativo: true,

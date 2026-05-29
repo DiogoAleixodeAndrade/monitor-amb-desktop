@@ -5,7 +5,7 @@ export const sectorLabels = {
   MEDICACAO: 'Sala de Medicação',
   CURATIVO: 'Sala de Curativo',
   ECO: 'Sala de ECO',
-  MAPA_CIRURGICO: 'Mapa Cirúrgico',
+  MAPA_CIRURGICO: 'Mapa 24h',
   FINALIZAR: 'Finalizar atendimento'
 };
 

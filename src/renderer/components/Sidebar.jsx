@@ -45,7 +45,7 @@ const menuItems = [
     permission: 'ECO'
   },
   {
-    label: 'Mapa Cirúrgico',
+    label: 'Mapa 24h',
     path: '/mapa-cirurgico',
     permission: 'MAPA_CIRURGICO'
   },

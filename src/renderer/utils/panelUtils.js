@@ -16,7 +16,7 @@ export function getPanelSectorLabel(setor) {
     MEDICACAO: 'Sala de Medicação',
     CURATIVO: 'Sala de Curativo',
     ECO: 'Sala de ECO',
-    MAPA_CIRURGICO: 'Mapa Cirúrgico'
+    MAPA_CIRURGICO: 'Mapa 24h'
   };
 
   return labels[setor] || setor || '---';
