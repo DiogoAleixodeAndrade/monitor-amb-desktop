@@ -5,6 +5,7 @@ import BarChart from '../components/BarChart.jsx';
 import DonutChart from '../components/DonutChart.jsx';
 import StatCard from '../components/StatCard.jsx';
 import { useQueue } from '../context/QueueContext.jsx';
+import ReportTable from '../components/ReportTable.jsx';
 import { mockAnalyticsHistory } from '../data/mockAnalyticsHistory.js';
 import {
   dashboardSectorLabels,
@@ -216,6 +217,8 @@ export default function Dashboard() {
           items={countByStatus}
         />
       </section>
+
+      <ReportTable data={filteredData} />
     </AppShell>
   );
 }
