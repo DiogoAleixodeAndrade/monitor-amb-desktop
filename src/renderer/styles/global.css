@@ -762,3 +762,324 @@ button {
     grid-template-columns: 250px 1fr;
   }
 }
+
+.btn-success {
+  width: auto;
+  min-width: 112px;
+  padding: 0 16px;
+  color: var(--white);
+  background: linear-gradient(135deg, #147a3f, #20a15a);
+  box-shadow: 0 12px 24px rgba(23, 128, 61, 0.18);
+}
+
+.btn-warning {
+  width: auto;
+  min-width: 132px;
+  padding: 0 16px;
+  color: #4f3000;
+  background: linear-gradient(135deg, #ffd166, #f5a524);
+  box-shadow: 0 12px 24px rgba(199, 121, 0, 0.16);
+}
+
+.btn-danger {
+  width: auto;
+  min-width: 112px;
+  padding: 0 16px;
+  color: var(--white);
+  background: linear-gradient(135deg, #b4142a, #ef3b55);
+  box-shadow: 0 12px 24px rgba(180, 20, 42, 0.2);
+}
+
+.queue-board {
+  display: grid;
+  gap: 20px;
+}
+
+.queue-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  padding: 28px;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top right, rgba(19, 104, 200, 0.12), transparent 34%),
+    var(--white);
+  border: 1px solid var(--gray-100);
+  box-shadow: var(--shadow-sm);
+}
+
+.queue-header h2 {
+  margin: 0;
+  color: var(--iecac-blue-900);
+  font-size: 2rem;
+  letter-spacing: -0.05em;
+}
+
+.queue-header span {
+  display: block;
+  margin-top: 8px;
+  color: var(--gray-500);
+}
+
+.queue-counter {
+  min-width: 132px;
+  padding: 18px;
+  border-radius: 22px;
+  text-align: center;
+  color: var(--white);
+  background: linear-gradient(135deg, var(--iecac-blue-800), var(--iecac-blue-600));
+  box-shadow: 0 16px 34px rgba(11, 79, 156, 0.22);
+}
+
+.queue-counter strong {
+  display: block;
+  font-size: 2.4rem;
+  line-height: 1;
+}
+
+.queue-counter span {
+  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 0.82rem;
+}
+
+.action-feedback {
+  padding: 14px 18px;
+  border-radius: 18px;
+  color: var(--iecac-blue-900);
+  background: rgba(19, 104, 200, 0.08);
+  border: 1px solid rgba(19, 104, 200, 0.14);
+  font-weight: 700;
+}
+
+.queue-list {
+  display: grid;
+  gap: 16px;
+}
+
+.patient-card {
+  display: grid;
+  grid-template-columns: 74px 1fr;
+  gap: 18px;
+  padding: 20px;
+  border-radius: 28px;
+  background: var(--white);
+  border: 1px solid var(--gray-100);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.patient-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 6px;
+  background: var(--iecac-blue-600);
+}
+
+.patient-priority::before {
+  background: var(--iecac-red-600);
+}
+
+.patient-eco-return::before {
+  background: #7c3aed;
+}
+
+.patient-position {
+  display: grid;
+  place-items: center;
+}
+
+.patient-position span {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  color: var(--white);
+  font-size: 1.35rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--iecac-blue-800), var(--iecac-blue-600));
+}
+
+.patient-priority .patient-position span {
+  background: linear-gradient(135deg, var(--iecac-red-700), var(--iecac-red-500));
+}
+
+.patient-eco-return .patient-position span {
+  background: linear-gradient(135deg, #4c1d95, #7c3aed);
+}
+
+.patient-main {
+  min-width: 0;
+}
+
+.patient-topline {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.patient-topline h3 {
+  margin: 0 0 6px;
+  color: var(--iecac-blue-900);
+  font-size: 1.35rem;
+  letter-spacing: -0.035em;
+}
+
+.patient-topline p {
+  margin: 0;
+  color: var(--gray-500);
+  font-size: 0.92rem;
+}
+
+.patient-badges {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.priority-badge,
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.priority-badge.normal {
+  color: var(--gray-700);
+  background: var(--gray-100);
+}
+
+.priority-badge.priority {
+  color: var(--white);
+  background: linear-gradient(135deg, var(--iecac-red-700), var(--iecac-red-500));
+}
+
+.priority-badge.eco {
+  color: var(--white);
+  background: linear-gradient(135deg, #4c1d95, #7c3aed);
+}
+
+.status-badge {
+  color: var(--iecac-blue-800);
+  background: rgba(19, 104, 200, 0.1);
+}
+
+.status-pausado_eco,
+.status-aguardando_retorno_eco {
+  color: #4c1d95;
+  background: rgba(124, 58, 237, 0.12);
+}
+
+.status-nao_compareceu {
+  color: var(--warning);
+  background: rgba(199, 121, 0, 0.12);
+}
+
+.status-finalizado {
+  color: var(--success);
+  background: rgba(23, 128, 61, 0.12);
+}
+
+.patient-meta {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.patient-meta div {
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-100);
+}
+
+.patient-meta span,
+.patient-meta strong {
+  display: block;
+}
+
+.patient-meta span {
+  margin-bottom: 5px;
+  color: var(--gray-500);
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.patient-meta strong {
+  color: var(--gray-900);
+  font-size: 0.9rem;
+}
+
+.patient-alert {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 16px;
+  color: var(--iecac-red-700);
+  background: rgba(213, 31, 60, 0.08);
+  border: 1px solid rgba(213, 31, 60, 0.14);
+  font-weight: 700;
+}
+
+.patient-eco-return .patient-alert {
+  color: #4c1d95;
+  background: rgba(124, 58, 237, 0.1);
+  border-color: rgba(124, 58, 237, 0.16);
+}
+
+.patient-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.patient-actions .btn-primary {
+  width: auto;
+  min-width: 112px;
+  padding: 0 16px;
+}
+
+.empty-state {
+  display: grid;
+  gap: 8px;
+  place-items: center;
+  min-height: 260px;
+  padding: 32px;
+  border-radius: 28px;
+  text-align: center;
+  background: var(--white);
+  border: 1px dashed var(--gray-300);
+  color: var(--gray-500);
+}
+
+.empty-state strong {
+  color: var(--iecac-blue-900);
+  font-size: 1.35rem;
+}
+
+@media (max-width: 1280px) {
+  .patient-meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .patient-topline {
+    display: grid;
+  }
+
+  .patient-badges {
+    justify-content: flex-start;
+  }
+}

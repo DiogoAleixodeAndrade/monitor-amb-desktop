@@ -1,19 +1,21 @@
 import AppShell from '../components/AppShell.jsx';
+import QueueBoard from '../components/QueueBoard.jsx';
+import { mockQueue } from '../data/mockQueue.js';
+import { filterQueueBySector } from '../utils/queueRules.js';
 
 export default function Curativo() {
+  const patients = filterQueueBySector(mockQueue, 'CURATIVO');
+
   return (
     <AppShell
       title="Sala de Curativo"
       subtitle="Fila de pacientes encaminhados para curativo"
     >
-      <div className="module-card">
-        <p className="eyebrow">Curativo</p>
-        <h2>Pacientes aguardando curativo</h2>
-        <p>
-          Aqui vamos montar a fila da sala de curativo com chamada, presença,
-          ausência, check-out e encaminhamentos.
-        </p>
-      </div>
+      <QueueBoard
+        title="Pacientes aguardando curativo"
+        subtitle="Fila exclusiva da sala de curativo."
+        patients={patients}
+      />
     </AppShell>
   );
-}
+}code src/renderer/pages/ECO.jsx
