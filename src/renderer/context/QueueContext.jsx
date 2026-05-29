@@ -66,9 +66,9 @@ export function QueueProvider({ children }) {
       currentQueue.map((item) =>
         item.idFila === idFila
           ? {
-              ...item,
-              ...updates
-            }
+            ...item,
+            ...updates
+          }
           : item
       )
     );
@@ -132,12 +132,13 @@ export function QueueProvider({ children }) {
     });
   }
 
-  function forwardPatient(patient, setorDestino, usuarioResponsavel) {
+  function forwardPatient(patient, setorDestino, usuarioResponsavel, observacao = '') {
     updateQueueItem(patient.idFila, {
       setorAtual: setorDestino,
       statusAtendimento: 'AGUARDANDO',
       dataHoraChamada: null,
       dataHoraApareceu: null,
+      observacaoEncaminhamento: observacao,
       usuarioResponsavel,
       ordem: queue.length + 1
     });

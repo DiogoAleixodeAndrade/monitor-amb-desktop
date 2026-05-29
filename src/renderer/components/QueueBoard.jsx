@@ -1,40 +1,11 @@
 import { useMemo, useState } from 'react';
 
+import ForwardPatientModal from './ForwardPatientModal.jsx';
 import PatientCard from './PatientCard.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useQueue } from '../context/QueueContext.jsx';
+import { sectorLabels } from '../data/forwardRules.js';
 import { canCallPatient, sortQueue } from '../utils/queueRules.js';
-
-const sectorOptions = [
-  {
-    value: 'ACOLHIMENTO',
-    label: 'Acolhimento'
-  },
-  {
-    value: 'MEDICO',
-    label: 'Médico'
-  },
-  {
-    value: 'ECG',
-    label: 'Sala de E.C.G.'
-  },
-  {
-    value: 'MEDICACAO',
-    label: 'Sala de Medicação'
-  },
-  {
-    value: 'CURATIVO',
-    label: 'Sala de Curativo'
-  },
-  {
-    value: 'ECO',
-    label: 'Sala de ECO'
-  },
-  {
-    value: 'MAPA_CIRURGICO',
-    label: 'Mapa Cirúrgico'
-  }
-];
 
 export default function QueueBoard({
   title,
@@ -58,6 +29,8 @@ export default function QueueBoard({
   } = useQueue();
 
   const [lastAction, setLastAction] = useState('');
+  const [forwardModalOpen, setForwardModalOpen] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState(null);
 
   const orderedPatients = useMemo(() => sortQueue(patients), [patients]);
 
@@ -123,33 +96,37 @@ export default function QueueBoard({
     );
   }
 
-  function handleForward(patient) {
-    const optionsText = sectorOptions
-      .map((item, index) => `${index + 1} - ${item.label}`)
-      .join('\n');
+  function handleOpenForwardModal(patient) {
+    setSelectedPatient(patient);
+    setForwardModalOpen(true);
+  }
 
-    const selectedOption = window.prompt(
-      `Encaminhar paciente para qual setor?\n\n${optionsText}\n\nDigite o número do setor:`
-    );
+  function handleCloseForwardModal() {
+    setSelectedPatient(null);
+    setForwardModalOpen(false);
+  }
 
-    if (!selectedOption) {
+  function handleConfirmForward({ patient, setorDestino, observacao }) {
+    if (setorDestino === 'FINALIZAR') {
+      finishPatient(patient, user?.usuario);
+
+      setLastAction(
+        `Atendimento finalizado para ${patient.nomeSocial || patient.nomePaciente}.`
+      );
+
+      handleCloseForwardModal();
       return;
     }
 
-    const selectedSector = sectorOptions[Number(selectedOption) - 1];
-
-    if (!selectedSector) {
-      setLastAction('Setor inválido. Encaminhamento cancelado.');
-      return;
-    }
-
-    forwardPatient(patient, selectedSector.value, user?.usuario);
+    forwardPatient(patient, setorDestino, user?.usuario, observacao);
 
     setLastAction(
       `${patient.nomeSocial || patient.nomePaciente} encaminhado para ${
-        selectedSector.label
+        sectorLabels[setorDestino] || setorDestino
       }.`
     );
+
+    handleCloseForwardModal();
   }
 
   function handleSendToEco(patient) {
@@ -228,7 +205,7 @@ export default function QueueBoard({
               onAppeared={handleAppeared}
               onMissing={handleMissing}
               onCheckout={handleCheckout}
-              onForward={handleForward}
+              onForward={handleOpenForwardModal}
               onSendToEco={handleSendToEco}
               onStartEco={handleStartEco}
               onFinishEco={handleFinishEco}
@@ -237,6 +214,13 @@ export default function QueueBoard({
           ))
         )}
       </div>
+
+      <ForwardPatientModal
+        open={forwardModalOpen}
+        patient={selectedPatient}
+        onClose={handleCloseForwardModal}
+        onConfirm={handleConfirmForward}
+      />
     </section>
   );
 }
