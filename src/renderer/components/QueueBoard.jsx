@@ -6,7 +6,11 @@ import PatientCard from './PatientCard.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useQueue } from '../context/QueueContext.jsx';
 import { sectorLabels } from '../data/forwardRules.js';
-import { canCallPatient, sortQueue } from '../utils/queueRules.js';
+import {
+  canCallPatient,
+  canFinishAttendance,
+  sortQueue
+} from '../utils/queueRules.js';
 
 export default function QueueBoard({
   title,
@@ -118,9 +122,8 @@ export default function QueueBoard({
       patient,
       title: 'Registrar ausência?',
       subtitle: 'Confirme antes de alterar a posição na fila.',
-      message: `Deseja registrar ausência de ${
-        patient.nomeSocial || patient.nomePaciente
-      }? O paciente ficará marcado como ausente e poderá ser chamado novamente depois.`,
+      message: `Deseja registrar ausência de ${patient.nomeSocial || patient.nomePaciente
+        }? O paciente ficará marcado como ausente e poderá ser chamado novamente depois.`,
       confirmLabel: 'Registrar ausência',
       variant: 'warning'
     });
@@ -135,14 +138,20 @@ export default function QueueBoard({
   }
 
   function handleCheckout(patient) {
+    const finishValidation = canFinishAttendance(patient);
+
+    if (!finishValidation.allowed) {
+      setLastAction(finishValidation.message);
+      return;
+    }
+
     openConfirmModal({
       type: 'FINISH',
       patient,
       title: 'Finalizar atendimento?',
       subtitle: 'Essa ação remove o paciente da fila ativa.',
-      message: `Deseja finalizar o atendimento de ${
-        patient.nomeSocial || patient.nomePaciente
-      }?`,
+      message: `Deseja finalizar o atendimento de ${patient.nomeSocial || patient.nomePaciente
+        }?`,
       confirmLabel: 'Finalizar atendimento',
       variant: 'danger'
     });
@@ -166,27 +175,23 @@ export default function QueueBoard({
     setForwardModalOpen(false);
   }
 
-  function handleConfirmForward({ patient, setorDestino, observacao }) {
-    if (setorDestino === 'FINALIZAR') {
-      finishPatient(patient, user?.usuario);
+  if (setorDestino === 'FINALIZAR') {
+    const finishValidation = canFinishAttendance(patient);
 
-      setLastAction(
-        `Atendimento finalizado para ${patient.nomeSocial || patient.nomePaciente}.`
-      );
-
+    if (!finishValidation.allowed) {
+      setLastAction(finishValidation.message);
       handleCloseForwardModal();
       return;
     }
 
-    forwardPatient(patient, setorDestino, user?.usuario, observacao);
+    finishPatient(patient, user?.usuario);
 
     setLastAction(
-      `${patient.nomeSocial || patient.nomePaciente} encaminhado para ${
-        sectorLabels[setorDestino] || setorDestino
-      }.`
+      `Atendimento finalizado para ${patient.nomeSocial || patient.nomePaciente}.`
     );
 
     handleCloseForwardModal();
+    return;
   }
 
   function handleSendToEco(patient) {
@@ -195,9 +200,8 @@ export default function QueueBoard({
       patient,
       title: 'Enviar para ECO?',
       subtitle: 'O atendimento médico ficará pausado.',
-      message: `Deseja enviar ${
-        patient.nomeSocial || patient.nomePaciente
-      } para ECO e pausar o atendimento até o retorno do exame?`,
+      message: `Deseja enviar ${patient.nomeSocial || patient.nomePaciente
+        } para ECO e pausar o atendimento até o retorno do exame?`,
       confirmLabel: 'Enviar para ECO',
       variant: 'eco'
     });

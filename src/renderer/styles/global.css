@@ -1794,3 +1794,9 @@ button {
   min-width: 160px;
   padding: 0 18px;
 }
+
+.patient-in-progress .patient-alert {
+  color: var(--iecac-blue-900);
+  background: rgba(19, 104, 200, 0.08);
+  border-color: rgba(19, 104, 200, 0.16);
+}

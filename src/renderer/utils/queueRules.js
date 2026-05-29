@@ -81,3 +81,42 @@ export function formatDateTime(value) {
     minute: '2-digit'
   }).format(date);
 }
+
+export function canFinishAttendance(patient) {
+  if (!patient?.dataHoraApareceu) {
+    return {
+      allowed: false,
+      remainingSeconds: 60,
+      message: 'Confirme a presença do paciente antes de finalizar.'
+    };
+  }
+
+  const appearedAt = new Date(patient.dataHoraApareceu).getTime();
+  const now = Date.now();
+
+  const elapsedSeconds = Math.floor((now - appearedAt) / 1000);
+  const minimumSeconds = 60;
+  const remainingSeconds = Math.max(minimumSeconds - elapsedSeconds, 0);
+
+  return {
+    allowed: elapsedSeconds >= minimumSeconds,
+    remainingSeconds,
+    message:
+      elapsedSeconds >= minimumSeconds
+        ? ''
+        : `O atendimento só pode ser finalizado após 1 minuto. Aguarde ${remainingSeconds}s.`
+  };
+}
+
+export function formatRemainingTime(seconds) {
+  if (seconds <= 0) return 'Liberado';
+
+  if (seconds < 60) {
+    return `${seconds}s`;
+  }
+
+  const minutes = Math.floor(seconds / 60);
+  const restSeconds = seconds % 60;
+
+  return `${minutes}min ${restSeconds}s`;
+}

@@ -1,7 +1,13 @@
+import { useEffect, useState } from 'react';
+
 import PriorityBadge from './PriorityBadge.jsx';
 import StatusBadge from './StatusBadge.jsx';
 import Button from './Button.jsx';
-import { formatDateTime } from '../utils/queueRules.js';
+import {
+  canFinishAttendance,
+  formatDateTime,
+  formatRemainingTime
+} from '../utils/queueRules.js';
 
 export default function PatientCard({
   patient,
@@ -17,6 +23,8 @@ export default function PatientCard({
   onFinishEco,
   onReturnFromEco
 }) {
+  const [now, setNow] = useState(Date.now());
+
   const displayName = patient.nomeSocial || patient.nomePaciente;
 
   const isCalled = patient.statusAtendimento === 'CHAMADO';
@@ -25,6 +33,21 @@ export default function PatientCard({
   const isPausedEco = patient.statusAtendimento === 'PAUSADO_ECO';
   const isWaitingEcoReturn =
     patient.statusAtendimento === 'AGUARDANDO_RETORNO_ECO';
+
+  const finishValidation = canFinishAttendance(patient);
+  const canFinish = isInProgress && finishValidation.allowed;
+
+  useEffect(() => {
+    if (!isInProgress || finishValidation.allowed) {
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setNow(Date.now());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isInProgress, finishValidation.allowed]);
 
   return (
     <article
@@ -65,8 +88,8 @@ export default function PatientCard({
           </div>
 
           <div>
-            <span>Médico</span>
-            <strong>{patient.nomeMedicoDestino || '-'}</strong>
+            <span>Presença</span>
+            <strong>{formatDateTime(patient.dataHoraApareceu)}</strong>
           </div>
 
           <div>
@@ -79,17 +102,22 @@ export default function PatientCard({
           patient.retornoExame ||
           isMissing ||
           isPausedEco ||
-          isWaitingEcoReturn) && (
+          isWaitingEcoReturn ||
+          (isInProgress && !finishValidation.allowed)) && (
           <div className="patient-alert">
-            {isMissing
-              ? 'Paciente registrado como ausente. Ele poderá ser chamado novamente após os próximos pacientes.'
-              : isPausedEco
-                ? 'Paciente pausado para realização de ECO. O atendimento médico ficará suspenso até o retorno.'
-                : isWaitingEcoReturn
-                  ? 'ECO realizado. Paciente aguardando retorno para a fila do mesmo médico.'
-                  : patient.retornoExame
-                    ? `Paciente retornou do ${patient.tipoExame} e deve voltar para o mesmo médico.`
-                    : patient.obsPrioridade}
+            {isInProgress && !finishValidation.allowed
+              ? `Finalização bloqueada. Tempo mínimo de atendimento: 1 minuto. Libera em ${formatRemainingTime(
+                  finishValidation.remainingSeconds
+                )}.`
+              : isMissing
+                ? 'Paciente registrado como ausente. Ele poderá ser chamado novamente após os próximos pacientes.'
+                : isPausedEco
+                  ? 'Paciente pausado para realização de ECO. O atendimento médico ficará suspenso até o retorno.'
+                  : isWaitingEcoReturn
+                    ? 'ECO realizado. Paciente aguardando retorno para a fila do mesmo médico.'
+                    : patient.retornoExame
+                      ? `Paciente retornou do ${patient.tipoExame} e deve voltar para o mesmo médico.`
+                      : patient.obsPrioridade}
           </div>
         )}
 
@@ -162,9 +190,13 @@ export default function PatientCard({
             <Button
               variant="danger"
               onClick={() => onCheckout(patient)}
-              disabled={!isInProgress}
+              disabled={!canFinish}
             >
-              Finalizar atendimento
+              {isInProgress && !finishValidation.allowed
+                ? `Finalizar em ${formatRemainingTime(
+                    finishValidation.remainingSeconds
+                  )}`
+                : 'Finalizar atendimento'}
             </Button>
           </div>
         )}
