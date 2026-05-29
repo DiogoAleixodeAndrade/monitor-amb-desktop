@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 
+import AdminFormModal from '../components/AdminFormModal.jsx';
 import AdminSection from '../components/AdminSection.jsx';
 import AdminTable from '../components/AdminTable.jsx';
 import AppShell from '../components/AppShell.jsx';
@@ -29,30 +30,51 @@ const tabs = [
   }
 ];
 
+const tabToModalType = {
+  USERS: 'USER',
+  PROFESSIONALS: 'PROFESSIONAL',
+  SPECIALTIES: 'SPECIALTY',
+  SETTINGS: 'SETTING'
+};
+
 export default function Admin() {
   const [activeTab, setActiveTab] = useState('USERS');
   const [search, setSearch] = useState('');
 
+  const [users, setUsers] = useState(adminUsers);
+  const [professionals, setProfessionals] = useState(adminProfessionals);
+  const [specialties, setSpecialties] = useState(adminSpecialties);
+  const [settings, setSettings] = useState(adminSettings);
+
+  const [modalState, setModalState] = useState({
+    open: false,
+    type: 'USER',
+    mode: 'CREATE',
+    data: null
+  });
+
+  const [feedback, setFeedback] = useState('');
+
   const summary = useMemo(
     () => ({
-      users: adminUsers.length,
-      professionals: adminProfessionals.length,
-      specialties: adminSpecialties.length,
-      settings: adminSettings.length
+      users: users.length,
+      professionals: professionals.length,
+      specialties: specialties.length,
+      settings: settings.length
     }),
-    []
+    [users, professionals, specialties, settings]
   );
 
   const normalizedSearch = search.trim().toLowerCase();
 
-  const filteredUsers = adminUsers.filter((item) =>
+  const filteredUsers = users.filter((item) =>
     [item.nome, item.usuario, item.perfil, item.vinculo]
       .join(' ')
       .toLowerCase()
       .includes(normalizedSearch)
   );
 
-  const filteredProfessionals = adminProfessionals.filter((item) =>
+  const filteredProfessionals = professionals.filter((item) =>
     [
       item.nome,
       item.usuario,
@@ -65,16 +87,197 @@ export default function Admin() {
       .includes(normalizedSearch)
   );
 
-  const filteredSpecialties = adminSpecialties.filter((item) =>
+  const filteredSpecialties = specialties.filter((item) =>
     [item.nome, item.status].join(' ').toLowerCase().includes(normalizedSearch)
   );
 
-  const filteredSettings = adminSettings.filter((item) =>
+  const filteredSettings = settings.filter((item) =>
     [item.chave, item.nome, item.valor, item.descricao]
       .join(' ')
       .toLowerCase()
       .includes(normalizedSearch)
   );
+
+  function openCreateModal() {
+    setFeedback('');
+
+    setModalState({
+      open: true,
+      type: tabToModalType[activeTab],
+      mode: 'CREATE',
+      data: null
+    });
+  }
+
+  function openEditModal(type, data) {
+    setFeedback('');
+
+    setModalState({
+      open: true,
+      type,
+      mode: 'EDIT',
+      data
+    });
+  }
+
+  function closeModal() {
+    setModalState((current) => ({
+      ...current,
+      open: false,
+      data: null
+    }));
+  }
+
+  function handleSave(payload) {
+    if (modalState.type === 'USER') {
+      saveUser(payload);
+    }
+
+    if (modalState.type === 'PROFESSIONAL') {
+      saveProfessional(payload);
+    }
+
+    if (modalState.type === 'SPECIALTY') {
+      saveSpecialty(payload);
+    }
+
+    if (modalState.type === 'SETTING') {
+      saveSetting(payload);
+    }
+
+    closeModal();
+  }
+
+  function saveUser(payload) {
+    if (modalState.mode === 'EDIT') {
+      setUsers((current) =>
+        current.map((item) =>
+          item.id === modalState.data.id
+            ? {
+                ...item,
+                ...payload
+              }
+            : item
+        )
+      );
+
+      setFeedback('Usuário atualizado com sucesso.');
+      return;
+    }
+
+    setUsers((current) => [
+      {
+        ...payload,
+        id: Date.now()
+      },
+      ...current
+    ]);
+
+    setFeedback('Usuário cadastrado com sucesso.');
+  }
+
+  function saveProfessional(payload) {
+    if (modalState.mode === 'EDIT') {
+      setProfessionals((current) =>
+        current.map((item) =>
+          item.id === modalState.data.id
+            ? {
+                ...item,
+                ...payload
+              }
+            : item
+        )
+      );
+
+      setFeedback('Profissional atualizado com sucesso.');
+      return;
+    }
+
+    setProfessionals((current) => [
+      {
+        ...payload,
+        id: Date.now()
+      },
+      ...current
+    ]);
+
+    setFeedback('Profissional cadastrado com sucesso.');
+  }
+
+  function saveSpecialty(payload) {
+    if (modalState.mode === 'EDIT') {
+      setSpecialties((current) =>
+        current.map((item) =>
+          item.id === modalState.data.id
+            ? {
+                ...item,
+                ...payload
+              }
+            : item
+        )
+      );
+
+      setFeedback('Especialidade atualizada com sucesso.');
+      return;
+    }
+
+    setSpecialties((current) => [
+      {
+        ...payload,
+        id: Date.now()
+      },
+      ...current
+    ]);
+
+    setFeedback('Especialidade cadastrada com sucesso.');
+  }
+
+  function saveSetting(payload) {
+    if (modalState.mode === 'EDIT') {
+      setSettings((current) =>
+        current.map((item) =>
+          item.id === modalState.data.id
+            ? {
+                ...item,
+                ...payload
+              }
+            : item
+        )
+      );
+
+      setFeedback('Configuração atualizada com sucesso.');
+      return;
+    }
+
+    setSettings((current) => [
+      {
+        ...payload,
+        id: Date.now()
+      },
+      ...current
+    ]);
+
+    setFeedback('Configuração cadastrada com sucesso.');
+  }
+
+  function toggleUserStatus(user) {
+    setUsers((current) =>
+      current.map((item) =>
+        item.id === user.id
+          ? {
+              ...item,
+              status: item.status === 'Ativo' ? 'Inativo' : 'Ativo'
+            }
+          : item
+      )
+    );
+
+    setFeedback(
+      `Usuário ${user.nome} ${
+        user.status === 'Ativo' ? 'inativado' : 'ativado'
+      } com sucesso.`
+    );
+  }
 
   return (
     <AppShell
@@ -121,7 +324,11 @@ export default function Admin() {
               key={tab.id}
               type="button"
               className={activeTab === tab.id ? 'active' : ''}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => {
+                setActiveTab(tab.id);
+                setSearch('');
+                setFeedback('');
+              }}
             >
               {tab.label}
             </button>
@@ -138,11 +345,14 @@ export default function Admin() {
         </label>
       </section>
 
+      {feedback && <div className="admin-feedback">{feedback}</div>}
+
       {activeTab === 'USERS' && (
         <AdminSection
           title="Usuários do sistema"
           subtitle="Controle de login, perfil e vínculo operacional."
           actionLabel="Novo usuário"
+          onAction={openCreateModal}
         >
           <AdminTable
             columns={[
@@ -167,15 +377,28 @@ export default function Admin() {
                 key: 'status',
                 label: 'Status',
                 render: (row) => (
-                  <span className="admin-status active">{row.status}</span>
+                  <span
+                    className={
+                      row.status === 'Ativo'
+                        ? 'admin-status active'
+                        : 'admin-status inactive'
+                    }
+                  >
+                    {row.status}
+                  </span>
                 )
               }
             ]}
             rows={filteredUsers}
-            renderActions={() => (
+            renderActions={(row) => (
               <div className="admin-row-actions">
-                <button>Editar</button>
-                <button>Permissões</button>
+                <button onClick={() => openEditModal('USER', row)}>
+                  Editar
+                </button>
+
+                <button onClick={() => toggleUserStatus(row)}>
+                  {row.status === 'Ativo' ? 'Inativar' : 'Ativar'}
+                </button>
               </div>
             )}
           />
@@ -187,6 +410,7 @@ export default function Admin() {
           title="Profissionais"
           subtitle="Médicos e profissionais vinculados às filas de atendimento."
           actionLabel="Novo profissional"
+          onAction={openCreateModal}
         >
           <AdminTable
             columns={[
@@ -222,10 +446,11 @@ export default function Admin() {
               }
             ]}
             rows={filteredProfessionals}
-            renderActions={() => (
+            renderActions={(row) => (
               <div className="admin-row-actions">
-                <button>Editar</button>
-                <button>Vincular especialidade</button>
+                <button onClick={() => openEditModal('PROFESSIONAL', row)}>
+                  Editar
+                </button>
               </div>
             )}
           />
@@ -237,6 +462,7 @@ export default function Admin() {
           title="Especialidades"
           subtitle="Especialidades disponíveis para agendamento e filas médicas."
           actionLabel="Nova especialidade"
+          onAction={openCreateModal}
         >
           <AdminTable
             columns={[
@@ -257,10 +483,11 @@ export default function Admin() {
               }
             ]}
             rows={filteredSpecialties}
-            renderActions={() => (
+            renderActions={(row) => (
               <div className="admin-row-actions">
-                <button>Editar</button>
-                <button>Inativar</button>
+                <button onClick={() => openEditModal('SPECIALTY', row)}>
+                  Editar
+                </button>
               </div>
             )}
           />
@@ -272,6 +499,7 @@ export default function Admin() {
           title="Configurações"
           subtitle="Parâmetros importantes do painel e das regras de atendimento."
           actionLabel="Nova configuração"
+          onAction={openCreateModal}
         >
           <AdminTable
             columns={[
@@ -294,14 +522,25 @@ export default function Admin() {
               }
             ]}
             rows={filteredSettings}
-            renderActions={() => (
+            renderActions={(row) => (
               <div className="admin-row-actions">
-                <button>Editar</button>
+                <button onClick={() => openEditModal('SETTING', row)}>
+                  Editar
+                </button>
               </div>
             )}
           />
         </AdminSection>
       )}
+
+      <AdminFormModal
+        open={modalState.open}
+        type={modalState.type}
+        mode={modalState.mode}
+        initialData={modalState.data}
+        onClose={closeModal}
+        onSave={handleSave}
+      />
     </AppShell>
   );
 }

@@ -1,4 +1,10 @@
-export default function AdminSection({ title, subtitle, actionLabel, children }) {
+export default function AdminSection({
+  title,
+  subtitle,
+  actionLabel,
+  onAction,
+  children
+}) {
   return (
     <section className="admin-section">
       <header className="admin-section-header">
@@ -9,7 +15,11 @@ export default function AdminSection({ title, subtitle, actionLabel, children })
         </div>
 
         {actionLabel && (
-          <button className="admin-action-button" type="button">
+          <button
+            className="admin-action-button"
+            type="button"
+            onClick={onAction}
+          >
             {actionLabel}
           </button>
         )}

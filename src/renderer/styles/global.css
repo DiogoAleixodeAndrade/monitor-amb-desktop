@@ -2584,3 +2584,32 @@ button {
     grid-template-columns: 1fr;
   }
 }
+
+.admin-feedback {
+  padding: 14px 18px;
+  border-radius: 18px;
+  color: var(--success);
+  background: rgba(23, 128, 61, 0.08);
+  border: 1px solid rgba(23, 128, 61, 0.16);
+  font-weight: 900;
+}
+
+.admin-form {
+  display: grid;
+  gap: 18px;
+}
+
+.admin-form-note {
+  padding: 14px 16px;
+  border-radius: 16px;
+  color: var(--iecac-blue-900);
+  background: rgba(19, 104, 200, 0.08);
+  border: 1px solid rgba(19, 104, 200, 0.14);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.admin-status.inactive {
+  color: var(--danger);
+  background: rgba(198, 40, 40, 0.1);
+}
