@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 
+import ConfirmModal from './ConfirmModal.jsx';
 import ForwardPatientModal from './ForwardPatientModal.jsx';
 import PatientCard from './PatientCard.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -29,22 +30,73 @@ export default function QueueBoard({
   } = useQueue();
 
   const [lastAction, setLastAction] = useState('');
+
   const [forwardModalOpen, setForwardModalOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
 
+  const [confirmState, setConfirmState] = useState({
+    open: false,
+    type: '',
+    patient: null,
+    title: '',
+    subtitle: '',
+    message: '',
+    confirmLabel: 'Confirmar',
+    variant: 'primary',
+    extra: null
+  });
+
   const orderedPatients = useMemo(() => sortQueue(patients), [patients]);
+
+  function closeConfirmModal() {
+    setConfirmState({
+      open: false,
+      type: '',
+      patient: null,
+      title: '',
+      subtitle: '',
+      message: '',
+      confirmLabel: 'Confirmar',
+      variant: 'primary',
+      extra: null
+    });
+  }
+
+  function openConfirmModal(config) {
+    setConfirmState({
+      open: true,
+      type: config.type,
+      patient: config.patient,
+      title: config.title,
+      subtitle: config.subtitle,
+      message: config.message,
+      confirmLabel: config.confirmLabel || 'Confirmar',
+      variant: config.variant || 'primary',
+      extra: config.extra || null
+    });
+  }
 
   function handleCall(patient) {
     const result = canCallPatient(patient, orderedPatients);
 
     if (!result.allowed) {
-      const confirmCall = window.confirm(result.message);
+      openConfirmModal({
+        type: 'CALL_OUT_OF_ORDER',
+        patient,
+        title: 'Chamar fora da ordem?',
+        subtitle: 'Atenção à regra de prioridade da fila.',
+        message: result.message,
+        confirmLabel: 'Chamar mesmo assim',
+        variant: 'warning'
+      });
 
-      if (!confirmCall) {
-        return;
-      }
+      return;
     }
 
+    executeCall(patient);
+  }
+
+  function executeCall(patient) {
     callPatient(patient, user?.usuario);
 
     setLastAction(
@@ -61,16 +113,20 @@ export default function QueueBoard({
   }
 
   function handleMissing(patient) {
-    const confirmMissing = window.confirm(
-      `Deseja registrar ausência de ${
+    openConfirmModal({
+      type: 'MISSING',
+      patient,
+      title: 'Registrar ausência?',
+      subtitle: 'Confirme antes de alterar a posição na fila.',
+      message: `Deseja registrar ausência de ${
         patient.nomeSocial || patient.nomePaciente
-      }? O paciente voltará para depois na fila.`
-    );
+      }? O paciente ficará marcado como ausente e poderá ser chamado novamente depois.`,
+      confirmLabel: 'Registrar ausência',
+      variant: 'warning'
+    });
+  }
 
-    if (!confirmMissing) {
-      return;
-    }
-
+  function executeMissing(patient) {
     registerAbsence(patient, user?.usuario);
 
     setLastAction(
@@ -79,16 +135,20 @@ export default function QueueBoard({
   }
 
   function handleCheckout(patient) {
-    const confirmFinish = window.confirm(
-      `Deseja finalizar o atendimento de ${
+    openConfirmModal({
+      type: 'FINISH',
+      patient,
+      title: 'Finalizar atendimento?',
+      subtitle: 'Essa ação remove o paciente da fila ativa.',
+      message: `Deseja finalizar o atendimento de ${
         patient.nomeSocial || patient.nomePaciente
-      }?`
-    );
+      }?`,
+      confirmLabel: 'Finalizar atendimento',
+      variant: 'danger'
+    });
+  }
 
-    if (!confirmFinish) {
-      return;
-    }
-
+  function executeFinish(patient) {
     finishPatient(patient, user?.usuario);
 
     setLastAction(
@@ -130,16 +190,20 @@ export default function QueueBoard({
   }
 
   function handleSendToEco(patient) {
-    const confirmEco = window.confirm(
-      `Deseja enviar ${
+    openConfirmModal({
+      type: 'SEND_ECO',
+      patient,
+      title: 'Enviar para ECO?',
+      subtitle: 'O atendimento médico ficará pausado.',
+      message: `Deseja enviar ${
         patient.nomeSocial || patient.nomePaciente
-      } para ECO e pausar o atendimento médico?`
-    );
+      } para ECO e pausar o atendimento até o retorno do exame?`,
+      confirmLabel: 'Enviar para ECO',
+      variant: 'eco'
+    });
+  }
 
-    if (!confirmEco) {
-      return;
-    }
-
+  function executeSendToEco(patient) {
     sendToEco(patient, user?.usuario);
 
     setLastAction(
@@ -169,6 +233,33 @@ export default function QueueBoard({
     setLastAction(
       `${patient.nomeSocial || patient.nomePaciente} retornou para a fila do médico ${patient.nomeMedicoDestino}.`
     );
+  }
+
+  function handleConfirmAction() {
+    const { type, patient } = confirmState;
+
+    if (!patient) {
+      closeConfirmModal();
+      return;
+    }
+
+    if (type === 'CALL_OUT_OF_ORDER') {
+      executeCall(patient);
+    }
+
+    if (type === 'MISSING') {
+      executeMissing(patient);
+    }
+
+    if (type === 'FINISH') {
+      executeFinish(patient);
+    }
+
+    if (type === 'SEND_ECO') {
+      executeSendToEco(patient);
+    }
+
+    closeConfirmModal();
   }
 
   return (
@@ -220,6 +311,17 @@ export default function QueueBoard({
         patient={selectedPatient}
         onClose={handleCloseForwardModal}
         onConfirm={handleConfirmForward}
+      />
+
+      <ConfirmModal
+        open={confirmState.open}
+        title={confirmState.title}
+        subtitle={confirmState.subtitle}
+        message={confirmState.message}
+        confirmLabel={confirmState.confirmLabel}
+        variant={confirmState.variant}
+        onClose={closeConfirmModal}
+        onConfirm={handleConfirmAction}
       />
     </section>
   );
