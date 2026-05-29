@@ -2,11 +2,15 @@ import { useEffect, useRef, useState } from 'react';
 
 import { useQueue } from '../context/QueueContext.jsx';
 import { formatPanelTime, getPanelSectorLabel } from '../utils/panelUtils.js';
-import { playCallSound } from '../utils/soundUtils.js';
+import { playCallSound, unlockCallSound } from '../utils/soundUtils.js';
 
 export default function Painel() {
   const { currentCall, callQueue, lastCalls } = useQueue();
+
   const [clock, setClock] = useState(new Date());
+  const [panelEnabled, setPanelEnabled] = useState(false);
+  const [soundMessage, setSoundMessage] = useState('');
+
   const lastPlayedCallId = useRef(null);
 
   useEffect(() => {
@@ -19,6 +23,10 @@ export default function Painel() {
 
   useEffect(() => {
     async function playSoundForCurrentCall() {
+      if (!panelEnabled) {
+        return;
+      }
+
       if (!currentCall) {
         return;
       }
@@ -32,17 +40,54 @@ export default function Painel() {
       try {
         await playCallSound();
       } catch {
-        console.warn('Não foi possível reproduzir o som de chamada.');
+        setSoundMessage('Não foi possível tocar o som da chamada.');
       }
     }
 
     playSoundForCurrentCall();
-  }, [currentCall]);
+  }, [currentCall, panelEnabled]);
+
+  async function handleEnablePanel() {
+    const result = await unlockCallSound();
+
+    if (!result.success) {
+      setSoundMessage(result.message);
+      return;
+    }
+
+    setPanelEnabled(true);
+    setSoundMessage('');
+  }
 
   const hasCurrentCall = Boolean(currentCall);
 
   return (
     <main className="painel-page">
+      {!panelEnabled && (
+        <section className="panel-activation">
+          <div className="panel-activation-card">
+            <div className="brand-mark">
+              <div className="brand-cross">+</div>
+              <div className="brand-pulse" />
+            </div>
+
+            <p className="eyebrow">Monitor Amb • IECAC</p>
+
+            <h2>Ativar painel de chamadas</h2>
+
+            <p>
+              Clique para liberar o som e iniciar o painel em modo de exibição.
+            </p>
+
+            <button onClick={handleEnablePanel}>
+              Ativar painel
+            </button>
+
+            {soundMessage && <span>{soundMessage}</span>}
+          </div>
+        </section>
+      )}
+
       <section className="painel-header">
         <div className="painel-logo">
           <div className="mini-logo">+</div>
@@ -73,7 +118,9 @@ export default function Painel() {
           {hasCurrentCall ? 'Paciente chamado' : 'Aguardando chamada'}
         </div>
 
-        <h1>{hasCurrentCall ? currentCall.nomePaciente : 'AGUARDANDO CHAMADA'}</h1>
+        <h1>
+          {hasCurrentCall ? currentCall.nomePaciente : 'AGUARDANDO CHAMADA'}
+        </h1>
 
         <div className="painel-destination-grid">
           <div className="painel-destination">
