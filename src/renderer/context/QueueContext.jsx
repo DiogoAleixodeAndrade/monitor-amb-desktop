@@ -1,13 +1,18 @@
-import { createContext, useContext, useMemo, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
 import { mockQueue } from '../data/mockQueue.js';
 import { priorities } from '../data/priorities.js';
 
 const QueueContext = createContext(null);
 
+const CALL_DISPLAY_TIME = 10000;
+
 export function QueueProvider({ children }) {
   const [queue, setQueue] = useState(mockQueue);
-  const [lastCall, setLastCall] = useState(null);
+
+  const [callQueue, setCallQueue] = useState([]);
+  const [currentCall, setCurrentCall] = useState(null);
+  const [lastCalls, setLastCalls] = useState([]);
 
   function checkInPatient({
     patient,
@@ -68,30 +73,33 @@ export function QueueProvider({ children }) {
   }
 
   function callPatient(patient, usuarioResponsavel) {
+    const dataHoraChamada = new Date().toISOString();
+
     const updatedPatient = {
       ...patient,
       statusAtendimento: 'CHAMADO',
-      dataHoraChamada: new Date().toISOString(),
+      dataHoraChamada,
       usuarioResponsavel
     };
 
     updateQueueItem(patient.idFila, {
-      statusAtendimento: updatedPatient.statusAtendimento,
-      dataHoraChamada: updatedPatient.dataHoraChamada,
-      usuarioResponsavel: updatedPatient.usuarioResponsavel
+      statusAtendimento: 'CHAMADO',
+      dataHoraChamada,
+      usuarioResponsavel
     });
 
-    setLastCall({
-      idChamada: Date.now(),
+    const newCall = {
+      idChamada: Date.now() + Math.random(),
       idFila: patient.idFila,
       nomePaciente: patient.nomeSocial || patient.nomePaciente,
       setorAtual: patient.setorAtual,
-      destino:
-        patient.setorAtual === 'MEDICO'
-          ? patient.nomeMedicoDestino
-          : formatSectorName(patient.setorAtual),
-      dataHoraChamada: updatedPatient.dataHoraChamada
-    });
+      destino: getCallDestination(patient),
+      profissional: patient.nomeMedicoDestino || '',
+      especialidade: patient.especialidade || '',
+      dataHoraChamada
+    };
+
+    setCallQueue((currentCalls) => [...currentCalls, newCall]);
 
     return updatedPatient;
   }
@@ -106,7 +114,7 @@ export function QueueProvider({ children }) {
 
   function registerAbsence(patient, usuarioResponsavel) {
     setQueue((currentQueue) => {
-      const updatedQueue = currentQueue.map((item) => {
+      return currentQueue.map((item) => {
         if (item.idFila !== patient.idFila) {
           return item;
         }
@@ -114,12 +122,11 @@ export function QueueProvider({ children }) {
         return {
           ...item,
           statusAtendimento: 'NAO_COMPARECEU',
+          dataHoraChamada: null,
           usuarioResponsavel,
           ordem: currentQueue.length + 1
         };
       });
-
-      return updatedQueue;
     });
   }
 
@@ -142,6 +149,35 @@ export function QueueProvider({ children }) {
     });
   }
 
+  useEffect(() => {
+    if (currentCall || callQueue.length === 0) {
+      return;
+    }
+
+    const nextCall = callQueue[0];
+
+    setCurrentCall(nextCall);
+    setCallQueue((currentCalls) => currentCalls.slice(1));
+
+    setLastCalls((currentLastCalls) => {
+      const updatedLastCalls = [nextCall, ...currentLastCalls];
+
+      return updatedLastCalls.slice(0, 6);
+    });
+  }, [currentCall, callQueue]);
+
+  useEffect(() => {
+    if (!currentCall) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setCurrentCall(null);
+    }, CALL_DISPLAY_TIME);
+
+    return () => clearTimeout(timer);
+  }, [currentCall]);
+
   const activeQueue = useMemo(() => {
     return queue.filter(
       (item) =>
@@ -155,7 +191,11 @@ export function QueueProvider({ children }) {
       queue,
       activeQueue,
       setQueue,
-      lastCall,
+
+      callQueue,
+      currentCall,
+      lastCalls,
+
       checkInPatient,
       callPatient,
       confirmPresence,
@@ -163,7 +203,7 @@ export function QueueProvider({ children }) {
       forwardPatient,
       finishPatient
     }),
-    [queue, activeQueue, lastCall]
+    [queue, activeQueue, callQueue, currentCall, lastCalls]
   );
 
   return <QueueContext.Provider value={value}>{children}</QueueContext.Provider>;
@@ -179,10 +219,13 @@ export function useQueue() {
   return context;
 }
 
-function formatSectorName(setor) {
+function getCallDestination(patient) {
+  if (patient.setorAtual === 'MEDICO') {
+    return patient.nomeMedicoDestino || 'Consultório médico';
+  }
+
   const sectorNames = {
     ACOLHIMENTO: 'Acolhimento',
-    MEDICO: 'Médico',
     ECG: 'Sala de E.C.G.',
     MEDICACAO: 'Sala de Medicação',
     CURATIVO: 'Sala de Curativo',
@@ -190,5 +233,5 @@ function formatSectorName(setor) {
     MAPA_CIRURGICO: 'Mapa Cirúrgico'
   };
 
-  return sectorNames[setor] || setor;
+  return sectorNames[patient.setorAtual] || patient.setorAtual;
 }
