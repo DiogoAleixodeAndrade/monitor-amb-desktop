@@ -12,6 +12,10 @@ export function sortQueue(patients) {
       return a.retornoExame ? -1 : 1;
     }
 
+    if ((a.ordem || 0) !== (b.ordem || 0)) {
+      return (a.ordem || 0) - (b.ordem || 0);
+    }
+
     const dateA = new Date(a.dataHoraEntrada).getTime();
     const dateB = new Date(b.dataHoraEntrada).getTime();
 

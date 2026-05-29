@@ -1537,3 +1537,22 @@ button {
   color: #fff2b8;
   font-size: 0.9rem;
 }
+
+.btn-eco {
+  width: auto;
+  min-width: 150px;
+  padding: 0 16px;
+  color: var(--white);
+  background: linear-gradient(135deg, #4c1d95, #7c3aed);
+  box-shadow: 0 12px 24px rgba(124, 58, 237, 0.22);
+}
+
+.patient-actions .btn-eco {
+  min-width: 158px;
+}
+
+.patient-eco-return {
+  box-shadow:
+    var(--shadow-sm),
+    0 0 0 1px rgba(124, 58, 237, 0.14);
+}

@@ -15,8 +15,9 @@ export default function Medico() {
     <AppShell title="Médico" subtitle="Fila individual do profissional logado">
       <QueueBoard
         title={user?.medicoVinculado?.nome || user?.nome}
-        subtitle="O médico visualiza apenas os pacientes destinados a ele."
+        subtitle="O médico visualiza apenas os pacientes destinados a ele, incluindo retornos de ECO."
         patients={patients}
+        context="MEDICO"
       />
     </AppShell>
   );

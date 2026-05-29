@@ -40,15 +40,21 @@ export default function QueueBoard({
   title,
   subtitle,
   patients,
+  context = 'DEFAULT',
   emptyMessage = 'Nenhum paciente aguardando neste setor.'
 }) {
   const { user } = useAuth();
+
   const {
     callPatient,
     confirmPresence,
     registerAbsence,
     forwardPatient,
-    finishPatient
+    finishPatient,
+    sendToEco,
+    startEcoExam,
+    finishEcoExam,
+    returnFromEcoToDoctor
   } = useQueue();
 
   const [lastAction, setLastAction] = useState('');
@@ -146,6 +152,48 @@ export default function QueueBoard({
     );
   }
 
+  function handleSendToEco(patient) {
+    const confirmEco = window.confirm(
+      `Deseja enviar ${
+        patient.nomeSocial || patient.nomePaciente
+      } para ECO e pausar o atendimento médico?`
+    );
+
+    if (!confirmEco) {
+      return;
+    }
+
+    sendToEco(patient, user?.usuario);
+
+    setLastAction(
+      `${patient.nomeSocial || patient.nomePaciente} foi enviado para ECO. Atendimento pausado.`
+    );
+  }
+
+  function handleStartEco(patient) {
+    startEcoExam(patient, user?.usuario);
+
+    setLastAction(
+      `ECO iniciado para ${patient.nomeSocial || patient.nomePaciente}.`
+    );
+  }
+
+  function handleFinishEco(patient) {
+    finishEcoExam(patient, user?.usuario);
+
+    setLastAction(
+      `ECO realizado para ${patient.nomeSocial || patient.nomePaciente}.`
+    );
+  }
+
+  function handleReturnFromEco(patient) {
+    returnFromEcoToDoctor(patient, user?.usuario);
+
+    setLastAction(
+      `${patient.nomeSocial || patient.nomePaciente} retornou para a fila do médico ${patient.nomeMedicoDestino}.`
+    );
+  }
+
   return (
     <section className="queue-board">
       <div className="queue-header">
@@ -175,11 +223,16 @@ export default function QueueBoard({
               key={patient.idFila}
               patient={patient}
               position={index + 1}
+              context={context}
               onCall={handleCall}
               onAppeared={handleAppeared}
               onMissing={handleMissing}
               onCheckout={handleCheckout}
               onForward={handleForward}
+              onSendToEco={handleSendToEco}
+              onStartEco={handleStartEco}
+              onFinishEco={handleFinishEco}
+              onReturnFromEco={handleReturnFromEco}
             />
           ))
         )}

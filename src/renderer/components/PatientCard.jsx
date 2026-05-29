@@ -6,17 +6,25 @@ import { formatDateTime } from '../utils/queueRules.js';
 export default function PatientCard({
   patient,
   position,
+  context = 'DEFAULT',
   onCall,
   onAppeared,
   onMissing,
   onCheckout,
-  onForward
+  onForward,
+  onSendToEco,
+  onStartEco,
+  onFinishEco,
+  onReturnFromEco
 }) {
   const displayName = patient.nomeSocial || patient.nomePaciente;
 
   const isCalled = patient.statusAtendimento === 'CHAMADO';
   const isInProgress = patient.statusAtendimento === 'EM_ATENDIMENTO';
   const isMissing = patient.statusAtendimento === 'NAO_COMPARECEU';
+  const isPausedEco = patient.statusAtendimento === 'PAUSADO_ECO';
+  const isWaitingEcoReturn =
+    patient.statusAtendimento === 'AGUARDANDO_RETORNO_ECO';
 
   return (
     <article
@@ -67,53 +75,99 @@ export default function PatientCard({
           </div>
         </div>
 
-        {(patient.obsPrioridade || patient.retornoExame || isMissing) && (
+        {(patient.obsPrioridade ||
+          patient.retornoExame ||
+          isMissing ||
+          isPausedEco ||
+          isWaitingEcoReturn) && (
           <div className="patient-alert">
             {isMissing
               ? 'Paciente registrado como ausente. Ele poderá ser chamado novamente após os próximos pacientes.'
-              : patient.retornoExame
-                ? `Paciente retornou do ${patient.tipoExame} e deve voltar para o mesmo médico.`
-                : patient.obsPrioridade}
+              : isPausedEco
+                ? 'Paciente pausado para realização de ECO. O atendimento médico ficará suspenso até o retorno.'
+                : isWaitingEcoReturn
+                  ? 'ECO realizado. Paciente aguardando retorno para a fila do mesmo médico.'
+                  : patient.retornoExame
+                    ? `Paciente retornou do ${patient.tipoExame} e deve voltar para o mesmo médico.`
+                    : patient.obsPrioridade}
           </div>
         )}
 
-        <div className="patient-actions">
-          <Button onClick={() => onCall(patient)} disabled={isInProgress}>
-            Chamar paciente
-          </Button>
+        {context === 'ECO' ? (
+          <div className="patient-actions">
+            <Button
+              variant="success"
+              onClick={() => onStartEco(patient)}
+              disabled={!isPausedEco}
+            >
+              Iniciar ECO
+            </Button>
 
-          <Button
-            variant="success"
-            onClick={() => onAppeared(patient)}
-            disabled={!isCalled}
-          >
-            Confirmar presença
-          </Button>
+            <Button
+              variant="secondary"
+              onClick={() => onFinishEco(patient)}
+              disabled={!isInProgress}
+            >
+              ECO realizado
+            </Button>
 
-          <Button
-            variant="warning"
-            onClick={() => onMissing(patient)}
-            disabled={isInProgress}
-          >
-            Registrar ausência
-          </Button>
+            <Button
+              variant="primary"
+              onClick={() => onReturnFromEco(patient)}
+              disabled={!isWaitingEcoReturn}
+            >
+              Retornar ao médico
+            </Button>
+          </div>
+        ) : (
+          <div className="patient-actions">
+            <Button onClick={() => onCall(patient)} disabled={isInProgress}>
+              Chamar paciente
+            </Button>
 
-          <Button
-            variant="secondary"
-            onClick={() => onForward(patient)}
-            disabled={!isInProgress}
-          >
-            Encaminhar paciente
-          </Button>
+            <Button
+              variant="success"
+              onClick={() => onAppeared(patient)}
+              disabled={!isCalled}
+            >
+              Confirmar presença
+            </Button>
 
-          <Button
-            variant="danger"
-            onClick={() => onCheckout(patient)}
-            disabled={!isInProgress}
-          >
-            Finalizar atendimento
-          </Button>
-        </div>
+            <Button
+              variant="warning"
+              onClick={() => onMissing(patient)}
+              disabled={isInProgress}
+            >
+              Registrar ausência
+            </Button>
+
+            <Button
+              variant="secondary"
+              onClick={() => onForward(patient)}
+              disabled={!isInProgress}
+            >
+              Encaminhar paciente
+            </Button>
+
+            {context === 'MEDICO' && (
+              <Button
+                variant="eco"
+                onClick={() => onSendToEco(patient)}
+                disabled={!isInProgress}
+              >
+                Enviar para ECO
+              </Button>
+            )}
+
+            <Button
+              variant="danger"
+              onClick={() => onCheckout(patient)}
+              disabled={!isInProgress}
+            >
+              Finalizar atendimento
+            </Button>
+          </div>
+        )}
       </div>
     </article>
   );

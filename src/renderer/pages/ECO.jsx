@@ -15,8 +15,9 @@ export default function ECO() {
     >
       <QueueBoard
         title="Pacientes enviados para ECO"
-        subtitle="Controle de exame em andamento, realizado e retorno ao médico."
+        subtitle="Inicie o exame, marque como realizado e retorne o paciente para o mesmo médico."
         patients={patients}
+        context="ECO"
       />
     </AppShell>
   );

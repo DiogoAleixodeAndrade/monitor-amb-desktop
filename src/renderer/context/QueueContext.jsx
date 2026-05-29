@@ -50,6 +50,8 @@ export function QueueProvider({ children }) {
       dataHoraPausa: null,
       dataHoraRetorno: null,
       dataHoraCheckout: null,
+      dataHoraEcoInicio: null,
+      dataHoraEcoRealizado: null,
       ordem: queue.length + 1,
       usuarioResponsavel
     };
@@ -149,6 +151,51 @@ export function QueueProvider({ children }) {
     });
   }
 
+  function sendToEco(patient, usuarioResponsavel) {
+    updateQueueItem(patient.idFila, {
+      setorAtual: 'ECO',
+      statusAtendimento: 'PAUSADO_ECO',
+      tipoExame: 'ECO',
+      motivoPausa: 'Paciente encaminhado para ECO durante atendimento médico.',
+      dataHoraPausa: new Date().toISOString(),
+      dataHoraChamada: null,
+      dataHoraApareceu: null,
+      retornoExame: false,
+      usuarioResponsavel,
+      ordem: queue.length + 1
+    });
+  }
+
+  function startEcoExam(patient, usuarioResponsavel) {
+    updateQueueItem(patient.idFila, {
+      statusAtendimento: 'EM_ATENDIMENTO',
+      dataHoraEcoInicio: new Date().toISOString(),
+      usuarioResponsavel
+    });
+  }
+
+  function finishEcoExam(patient, usuarioResponsavel) {
+    updateQueueItem(patient.idFila, {
+      statusAtendimento: 'AGUARDANDO_RETORNO_ECO',
+      dataHoraEcoRealizado: new Date().toISOString(),
+      usuarioResponsavel
+    });
+  }
+
+  function returnFromEcoToDoctor(patient, usuarioResponsavel) {
+    updateQueueItem(patient.idFila, {
+      setorAtual: 'MEDICO',
+      statusAtendimento: 'AGUARDANDO_RETORNO_ECO',
+      retornoExame: true,
+      tipoExame: 'ECO',
+      dataHoraRetorno: new Date().toISOString(),
+      dataHoraChamada: null,
+      dataHoraApareceu: null,
+      usuarioResponsavel,
+      ordem: 0
+    });
+  }
+
   useEffect(() => {
     if (currentCall || callQueue.length === 0) {
       return;
@@ -201,7 +248,12 @@ export function QueueProvider({ children }) {
       confirmPresence,
       registerAbsence,
       forwardPatient,
-      finishPatient
+      finishPatient,
+
+      sendToEco,
+      startEcoExam,
+      finishEcoExam,
+      returnFromEcoToDoctor
     }),
     [queue, activeQueue, callQueue, currentCall, lastCalls]
   );
