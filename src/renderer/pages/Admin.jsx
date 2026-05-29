@@ -1,15 +1,19 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import AdminFormModal from '../components/AdminFormModal.jsx';
 import AdminSection from '../components/AdminSection.jsx';
 import AdminTable from '../components/AdminTable.jsx';
 import AppShell from '../components/AppShell.jsx';
 import {
-  adminProfessionals,
-  adminSettings,
-  adminSpecialties,
-  adminUsers
-} from '../data/adminMockData.js';
+  listAdminProfessionalsService,
+  listAdminSettingsService,
+  listAdminSpecialtiesService,
+  listAdminUsersService,
+  saveAdminProfessionalService,
+  saveAdminSettingService,
+  saveAdminSpecialtyService,
+  saveAdminUserService
+} from '../services/adminService.js';
 
 const tabs = [
   {
@@ -41,10 +45,11 @@ export default function Admin() {
   const [activeTab, setActiveTab] = useState('USERS');
   const [search, setSearch] = useState('');
 
-  const [users, setUsers] = useState(adminUsers);
-  const [professionals, setProfessionals] = useState(adminProfessionals);
-  const [specialties, setSpecialties] = useState(adminSpecialties);
-  const [settings, setSettings] = useState(adminSettings);
+  const [users, setUsers] = useState([]);
+  const [professionals, setProfessionals] = useState([]);
+  const [specialties, setSpecialties] = useState([]);
+  const [settings, setSettings] = useState([]);
+  const [loadingAdmin, setLoadingAdmin] = useState(true);
 
   const [modalState, setModalState] = useState({
     open: false,
@@ -54,6 +59,40 @@ export default function Admin() {
   });
 
   const [feedback, setFeedback] = useState('');
+
+  useEffect(() => {
+    loadAdminData();
+  }, []);
+
+  async function loadAdminData() {
+    setLoadingAdmin(true);
+
+    const [usersResult, professionalsResult, specialtiesResult, settingsResult] =
+      await Promise.all([
+        listAdminUsersService(),
+        listAdminProfessionalsService(),
+        listAdminSpecialtiesService(),
+        listAdminSettingsService()
+      ]);
+
+    if (usersResult.success) {
+      setUsers(usersResult.data);
+    }
+
+    if (professionalsResult.success) {
+      setProfessionals(professionalsResult.data);
+    }
+
+    if (specialtiesResult.success) {
+      setSpecialties(specialtiesResult.data);
+    }
+
+    if (settingsResult.success) {
+      setSettings(settingsResult.data);
+    }
+
+    setLoadingAdmin(false);
+  }
 
   const summary = useMemo(
     () => ({
@@ -128,153 +167,142 @@ export default function Admin() {
     }));
   }
 
-  function handleSave(payload) {
+  async function handleSave(payload) {
     if (modalState.type === 'USER') {
-      saveUser(payload);
+      await saveUser(payload);
     }
 
     if (modalState.type === 'PROFESSIONAL') {
-      saveProfessional(payload);
+      await saveProfessional(payload);
     }
 
     if (modalState.type === 'SPECIALTY') {
-      saveSpecialty(payload);
+      await saveSpecialty(payload);
     }
 
     if (modalState.type === 'SETTING') {
-      saveSetting(payload);
+      await saveSetting(payload);
     }
 
     closeModal();
   }
 
-  function saveUser(payload) {
-    if (modalState.mode === 'EDIT') {
-      setUsers((current) =>
-        current.map((item) =>
-          item.id === modalState.data.id
-            ? {
-                ...item,
-                ...payload
-              }
-            : item
-        )
-      );
+  async function saveUser(payload) {
+    const dataToSave =
+      modalState.mode === 'EDIT'
+        ? {
+          ...modalState.data,
+          ...payload
+        }
+        : payload;
 
-      setFeedback('Usuário atualizado com sucesso.');
+    const result = await saveAdminUserService(dataToSave, modalState.mode);
+
+    if (!result.success) {
+      setFeedback(result.message || 'Erro ao salvar usuário.');
       return;
     }
 
-    setUsers((current) => [
-      {
-        ...payload,
-        id: Date.now()
-      },
-      ...current
-    ]);
-
-    setFeedback('Usuário cadastrado com sucesso.');
+    setUsers(result.data);
+    setFeedback(
+      modalState.mode === 'EDIT'
+        ? 'Usuário atualizado com sucesso.'
+        : 'Usuário cadastrado com sucesso.'
+    );
   }
 
-  function saveProfessional(payload) {
-    if (modalState.mode === 'EDIT') {
-      setProfessionals((current) =>
-        current.map((item) =>
-          item.id === modalState.data.id
-            ? {
-                ...item,
-                ...payload
-              }
-            : item
-        )
-      );
+  async function saveProfessional(payload) {
+    const dataToSave =
+      modalState.mode === 'EDIT'
+        ? {
+          ...modalState.data,
+          ...payload
+        }
+        : payload;
 
-      setFeedback('Profissional atualizado com sucesso.');
-      return;
-    }
-
-    setProfessionals((current) => [
-      {
-        ...payload,
-        id: Date.now()
-      },
-      ...current
-    ]);
-
-    setFeedback('Profissional cadastrado com sucesso.');
-  }
-
-  function saveSpecialty(payload) {
-    if (modalState.mode === 'EDIT') {
-      setSpecialties((current) =>
-        current.map((item) =>
-          item.id === modalState.data.id
-            ? {
-                ...item,
-                ...payload
-              }
-            : item
-        )
-      );
-
-      setFeedback('Especialidade atualizada com sucesso.');
-      return;
-    }
-
-    setSpecialties((current) => [
-      {
-        ...payload,
-        id: Date.now()
-      },
-      ...current
-    ]);
-
-    setFeedback('Especialidade cadastrada com sucesso.');
-  }
-
-  function saveSetting(payload) {
-    if (modalState.mode === 'EDIT') {
-      setSettings((current) =>
-        current.map((item) =>
-          item.id === modalState.data.id
-            ? {
-                ...item,
-                ...payload
-              }
-            : item
-        )
-      );
-
-      setFeedback('Configuração atualizada com sucesso.');
-      return;
-    }
-
-    setSettings((current) => [
-      {
-        ...payload,
-        id: Date.now()
-      },
-      ...current
-    ]);
-
-    setFeedback('Configuração cadastrada com sucesso.');
-  }
-
-  function toggleUserStatus(user) {
-    setUsers((current) =>
-      current.map((item) =>
-        item.id === user.id
-          ? {
-              ...item,
-              status: item.status === 'Ativo' ? 'Inativo' : 'Ativo'
-            }
-          : item
-      )
+    const result = await saveAdminProfessionalService(
+      dataToSave,
+      modalState.mode
     );
 
+    if (!result.success) {
+      setFeedback(result.message || 'Erro ao salvar profissional.');
+      return;
+    }
+
+    setProfessionals(result.data);
     setFeedback(
-      `Usuário ${user.nome} ${
-        user.status === 'Ativo' ? 'inativado' : 'ativado'
+      modalState.mode === 'EDIT'
+        ? 'Profissional atualizado com sucesso.'
+        : 'Profissional cadastrado com sucesso.'
+    );
+  }
+
+  async function saveSpecialty(payload) {
+    const dataToSave =
+      modalState.mode === 'EDIT'
+        ? {
+          ...modalState.data,
+          ...payload
+        }
+        : payload;
+
+    const result = await saveAdminSpecialtyService(dataToSave, modalState.mode);
+
+    if (!result.success) {
+      setFeedback(result.message || 'Erro ao salvar especialidade.');
+      return;
+    }
+
+    setSpecialties(result.data);
+    setFeedback(
+      modalState.mode === 'EDIT'
+        ? 'Especialidade atualizada com sucesso.'
+        : 'Especialidade cadastrada com sucesso.'
+    );
+  }
+
+  async function saveSetting(payload) {
+    const dataToSave =
+      modalState.mode === 'EDIT'
+        ? {
+          ...modalState.data,
+          ...payload
+        }
+        : payload;
+
+    const result = await saveAdminSettingService(dataToSave, modalState.mode);
+
+    if (!result.success) {
+      setFeedback(result.message || 'Erro ao salvar configuração.');
+      return;
+    }
+
+    setSettings(result.data);
+    setFeedback(
+      modalState.mode === 'EDIT'
+        ? 'Configuração atualizada com sucesso.'
+        : 'Configuração cadastrada com sucesso.'
+    );
+  }
+
+  async function toggleUserStatus(user) {
+    const updatedUser = {
+      ...user,
+      status: user.status === 'Ativo' ? 'Inativo' : 'Ativo'
+    };
+
+    const result = await saveAdminUserService(updatedUser, 'EDIT');
+
+    if (!result.success) {
+      setFeedback(result.message || 'Erro ao alterar status do usuário.');
+      return;
+    }
+
+    setUsers(result.data);
+
+    setFeedback(
+      `Usuário ${user.nome} ${user.status === 'Ativo' ? 'inativado' : 'ativado'
       } com sucesso.`
     );
   }
@@ -284,6 +312,9 @@ export default function Admin() {
       title="Administração"
       subtitle="Usuários, permissões, profissionais, especialidades e configurações"
     >
+      {loadingAdmin && (
+        <div className="admin-feedback">Carregando dados administrativos...</div>
+      )}
       <section className="admin-hero">
         <div>
           <p className="eyebrow">Central administrativa</p>

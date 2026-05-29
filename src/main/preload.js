@@ -32,5 +32,29 @@ contextBridge.exposeInMainWorld('monitorAmb', {
 
     atualizarStatus: (payload) =>
       ipcRenderer.invoke('fila:atualizar-status', payload)
+  },
+
+  admin: {
+    listUsers: () => ipcRenderer.invoke('admin:list-users'),
+    createUser: (payload) => ipcRenderer.invoke('admin:create-user', payload),
+    updateUser: (payload) => ipcRenderer.invoke('admin:update-user', payload),
+
+    listProfessionals: () => ipcRenderer.invoke('admin:list-professionals'),
+    createProfessional: (payload) =>
+      ipcRenderer.invoke('admin:create-professional', payload),
+    updateProfessional: (payload) =>
+      ipcRenderer.invoke('admin:update-professional', payload),
+
+    listSpecialties: () => ipcRenderer.invoke('admin:list-specialties'),
+    createSpecialty: (payload) =>
+      ipcRenderer.invoke('admin:create-specialty', payload),
+    updateSpecialty: (payload) =>
+      ipcRenderer.invoke('admin:update-specialty', payload),
+
+    listSettings: () => ipcRenderer.invoke('admin:list-settings'),
+    createSetting: (payload) =>
+      ipcRenderer.invoke('admin:create-setting', payload),
+    updateSetting: (payload) =>
+      ipcRenderer.invoke('admin:update-setting', payload)
   }
 });

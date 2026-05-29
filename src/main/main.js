@@ -1,6 +1,7 @@
 import { app, BrowserWindow, ipcMain, screen } from 'electron';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { registerAdminIpc } from './ipc/adminIpc.js';
 
 import { registerAuthIpc } from './ipc/authIpc.js';
 import { registerFilaIpc } from './ipc/filaIpc.js';
@@ -151,6 +152,7 @@ app.whenReady().then(() => {
   registerPacientesIpc();
   registerProfissionaisIpc();
   registerFilaIpc();
+  registerAdminIpc();
 
   createMainWindow();
 
