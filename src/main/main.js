@@ -2,6 +2,11 @@ import { app, BrowserWindow, ipcMain, screen } from 'electron';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { registerAuthIpc } from './ipc/authIpc.js';
+import { registerFilaIpc } from './ipc/filaIpc.js';
+import { registerPacientesIpc } from './ipc/pacientesIpc.js';
+import { registerProfissionaisIpc } from './ipc/profissionaisIpc.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -142,6 +147,11 @@ function closePanelWindow() {
 }
 
 app.whenReady().then(() => {
+  registerAuthIpc();
+  registerPacientesIpc();
+  registerProfissionaisIpc();
+  registerFilaIpc();
+
   createMainWindow();
 
   app.on('activate', () => {
