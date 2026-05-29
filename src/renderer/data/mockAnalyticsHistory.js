@@ -1,0 +1,122 @@
+export const mockAnalyticsHistory = [
+  {
+    idAtendimento: 1001,
+    nomePaciente: 'Maria Aparecida dos Santos',
+    setorAtual: 'ACOLHIMENTO',
+    nomeMedicoDestino: 'João Carlos',
+    statusAtendimento: 'FINALIZADO',
+    prioritario: true,
+    retornoExame: false,
+    dataHoraEntrada: '2026-05-01T08:00:00',
+    dataHoraApareceu: '2026-05-01T08:08:00',
+    dataHoraCheckout: '2026-05-01T08:22:00'
+  },
+  {
+    idAtendimento: 1002,
+    nomePaciente: 'Carlos Henrique Almeida',
+    setorAtual: 'MEDICO',
+    nomeMedicoDestino: 'João Carlos',
+    statusAtendimento: 'FINALIZADO',
+    prioritario: false,
+    retornoExame: false,
+    dataHoraEntrada: '2026-05-02T09:10:00',
+    dataHoraApareceu: '2026-05-02T09:18:00',
+    dataHoraCheckout: '2026-05-02T09:42:00'
+  },
+  {
+    idAtendimento: 1003,
+    nomePaciente: 'Ana Paula Ferreira',
+    setorAtual: 'ECG',
+    nomeMedicoDestino: 'Fernanda Almeida',
+    statusAtendimento: 'FINALIZADO',
+    prioritario: false,
+    retornoExame: false,
+    dataHoraEntrada: '2026-05-03T10:00:00',
+    dataHoraApareceu: '2026-05-03T10:05:00',
+    dataHoraCheckout: '2026-05-03T10:18:00'
+  },
+  {
+    idAtendimento: 1004,
+    nomePaciente: 'Roberto Lima Costa',
+    setorAtual: 'MEDICACAO',
+    nomeMedicoDestino: 'João Carlos',
+    statusAtendimento: 'FINALIZADO',
+    prioritario: true,
+    retornoExame: false,
+    dataHoraEntrada: '2026-05-04T11:20:00',
+    dataHoraApareceu: '2026-05-04T11:26:00',
+    dataHoraCheckout: '2026-05-04T11:55:00'
+  },
+  {
+    idAtendimento: 1005,
+    nomePaciente: 'Fernanda Martins Rocha',
+    setorAtual: 'CURATIVO',
+    nomeMedicoDestino: 'Roberto Vasconcelos',
+    statusAtendimento: 'FINALIZADO',
+    prioritario: false,
+    retornoExame: false,
+    dataHoraEntrada: '2026-05-05T13:00:00',
+    dataHoraApareceu: '2026-05-05T13:04:00',
+    dataHoraCheckout: '2026-05-05T13:21:00'
+  },
+  {
+    idAtendimento: 1006,
+    nomePaciente: 'Helena Cristina Moraes',
+    setorAtual: 'ECO',
+    nomeMedicoDestino: 'João Carlos',
+    statusAtendimento: 'FINALIZADO',
+    prioritario: true,
+    retornoExame: true,
+    dataHoraEntrada: '2026-05-06T14:00:00',
+    dataHoraApareceu: '2026-05-06T14:15:00',
+    dataHoraCheckout: '2026-05-06T14:48:00'
+  },
+  {
+    idAtendimento: 1007,
+    nomePaciente: 'Patrícia Azevedo Nunes',
+    setorAtual: 'MAPA_CIRURGICO',
+    nomeMedicoDestino: 'Roberto Vasconcelos',
+    statusAtendimento: 'FINALIZADO',
+    prioritario: false,
+    retornoExame: false,
+    dataHoraEntrada: '2026-05-07T08:30:00',
+    dataHoraApareceu: '2026-05-07T08:40:00',
+    dataHoraCheckout: '2026-05-07T09:05:00'
+  },
+  {
+    idAtendimento: 1008,
+    nomePaciente: 'Marcos Vinícius Teixeira',
+    setorAtual: 'MEDICO',
+    nomeMedicoDestino: 'Fernanda Almeida',
+    statusAtendimento: 'FINALIZADO',
+    prioritario: false,
+    retornoExame: false,
+    dataHoraEntrada: '2026-05-08T15:10:00',
+    dataHoraApareceu: '2026-05-08T15:20:00',
+    dataHoraCheckout: '2026-05-08T15:50:00'
+  },
+  {
+    idAtendimento: 1009,
+    nomePaciente: 'José Carlos Pereira',
+    setorAtual: 'ACOLHIMENTO',
+    nomeMedicoDestino: 'João Carlos',
+    statusAtendimento: 'NAO_COMPARECEU',
+    prioritario: false,
+    retornoExame: false,
+    dataHoraEntrada: '2026-05-09T09:00:00',
+    dataHoraApareceu: null,
+    dataHoraCheckout: null
+  },
+  {
+    idAtendimento: 1010,
+    nomePaciente: 'Larissa Gomes Nascimento',
+    setorAtual: 'MEDICO',
+    nomeMedicoDestino: 'João Carlos',
+    statusAtendimento: 'FINALIZADO',
+    prioritario: true,
+    retornoExame: true,
+    dataHoraEntrada: '2026-05-10T10:10:00',
+    dataHoraApareceu: '2026-05-10T10:22:00',
+    dataHoraCheckout: '2026-05-10T11:00:00'
+  }
+];
