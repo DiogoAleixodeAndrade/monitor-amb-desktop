@@ -14,10 +14,17 @@ export default function PatientCard({
 }) {
   const displayName = patient.nomeSocial || patient.nomePaciente;
 
+  const isCalled = patient.statusAtendimento === 'CHAMADO';
+  const isInProgress = patient.statusAtendimento === 'EM_ATENDIMENTO';
+  const isMissing = patient.statusAtendimento === 'NAO_COMPARECEU';
+
   return (
     <article
-      className={`patient-card ${patient.prioritario ? 'patient-priority' : ''
-        } ${patient.retornoExame ? 'patient-eco-return' : ''}`}
+      className={`patient-card ${
+        patient.prioritario ? 'patient-priority' : ''
+      } ${patient.retornoExame ? 'patient-eco-return' : ''} ${
+        isInProgress ? 'patient-in-progress' : ''
+      } ${isMissing ? 'patient-missing' : ''}`}
     >
       <div className="patient-position">
         <span>{position}</span>
@@ -45,13 +52,13 @@ export default function PatientCard({
           </div>
 
           <div>
-            <span>Médico</span>
-            <strong>{patient.nomeMedicoDestino || '-'}</strong>
+            <span>Chamada</span>
+            <strong>{formatDateTime(patient.dataHoraChamada)}</strong>
           </div>
 
           <div>
-            <span>Especialidade</span>
-            <strong>{patient.especialidade || '-'}</strong>
+            <span>Médico</span>
+            <strong>{patient.nomeMedicoDestino || '-'}</strong>
           </div>
 
           <div>
@@ -60,30 +67,50 @@ export default function PatientCard({
           </div>
         </div>
 
-        {(patient.obsPrioridade || patient.retornoExame) && (
+        {(patient.obsPrioridade || patient.retornoExame || isMissing) && (
           <div className="patient-alert">
-            {patient.retornoExame
-              ? `Paciente retornou do ${patient.tipoExame} e deve voltar para o mesmo médico.`
-              : patient.obsPrioridade}
+            {isMissing
+              ? 'Paciente registrado como ausente. Ele poderá ser chamado novamente após os próximos pacientes.'
+              : patient.retornoExame
+                ? `Paciente retornou do ${patient.tipoExame} e deve voltar para o mesmo médico.`
+                : patient.obsPrioridade}
           </div>
         )}
 
         <div className="patient-actions">
-          <Button onClick={() => onCall(patient)}>Chamar paciente</Button>
+          <Button onClick={() => onCall(patient)} disabled={isInProgress}>
+            Chamar paciente
+          </Button>
 
-          <Button variant="success" onClick={() => onAppeared(patient)}>
+          <Button
+            variant="success"
+            onClick={() => onAppeared(patient)}
+            disabled={!isCalled}
+          >
             Confirmar presença
           </Button>
 
-          <Button variant="warning" onClick={() => onMissing(patient)}>
+          <Button
+            variant="warning"
+            onClick={() => onMissing(patient)}
+            disabled={isInProgress}
+          >
             Registrar ausência
           </Button>
 
-          <Button variant="secondary" onClick={() => onForward(patient)}>
+          <Button
+            variant="secondary"
+            onClick={() => onForward(patient)}
+            disabled={!isInProgress}
+          >
             Encaminhar paciente
           </Button>
 
-          <Button variant="danger" onClick={() => onCheckout(patient)}>
+          <Button
+            variant="danger"
+            onClick={() => onCheckout(patient)}
+            disabled={!isInProgress}
+          >
             Finalizar atendimento
           </Button>
         </div>

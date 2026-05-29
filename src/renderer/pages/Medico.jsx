@@ -6,10 +6,10 @@ import { filterMedicalQueue } from '../utils/queueRules.js';
 
 export default function Medico() {
   const { user } = useAuth();
-  const { queue } = useQueue();
+  const { activeQueue } = useQueue();
 
   const medicoId = user?.medicoVinculado?.id;
-  const patients = filterMedicalQueue(queue, medicoId);
+  const patients = filterMedicalQueue(activeQueue, medicoId);
 
   return (
     <AppShell title="Médico" subtitle="Fila individual do profissional logado">

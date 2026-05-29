@@ -17,9 +17,9 @@ export const permissionsByRole = {
 
   ACOLHIMENTO: ['DASHBOARD', 'ACOLHIMENTO'],
 
-  MEDICO: ['DASHBOARD', 'MEDICO'],
+  MEDICO: ['DASHBOARD', 'MEDICO', 'ECO'],
 
-  ECG: ['DASHBOARD', 'ECG'],
+  ECG: ['DASHBOARD', 'ECG', 'MAPA_CIRURGICO'],
 
   MEDICACAO: ['DASHBOARD', 'MEDICACAO'],
 

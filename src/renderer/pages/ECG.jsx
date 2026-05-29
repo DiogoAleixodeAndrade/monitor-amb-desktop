@@ -4,9 +4,9 @@ import { useQueue } from '../context/QueueContext.jsx';
 import { filterQueueBySector } from '../utils/queueRules.js';
 
 export default function ECG() {
-  const { queue } = useQueue();
+  const { activeQueue } = useQueue();
 
-  const patients = filterQueueBySector(queue, 'ECG');
+  const patients = filterQueueBySector(activeQueue, 'ECG');
 
   return (
     <AppShell title="Sala de E.C.G." subtitle="Fila da sala de eletrocardiograma">

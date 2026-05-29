@@ -4,9 +4,9 @@ import { useQueue } from '../context/QueueContext.jsx';
 import { filterQueueBySector } from '../utils/queueRules.js';
 
 export default function ECO() {
-  const { queue } = useQueue();
+  const { activeQueue } = useQueue();
 
-  const patients = filterQueueBySector(queue, 'ECO');
+  const patients = filterQueueBySector(activeQueue, 'ECO');
 
   return (
     <AppShell

@@ -1273,3 +1273,41 @@ button {
     margin-bottom: 0;
   }
 }
+
+.patient-in-progress::before {
+  background: var(--success);
+}
+
+.patient-missing::before {
+  background: var(--warning);
+}
+
+.patient-in-progress .patient-position span {
+  background: linear-gradient(135deg, #147a3f, #20a15a);
+}
+
+.patient-missing .patient-position span {
+  color: #4f3000;
+  background: linear-gradient(135deg, #ffd166, #f5a524);
+}
+
+.status-chamado {
+  color: var(--iecac-blue-800);
+  background: rgba(19, 104, 200, 0.12);
+}
+
+.status-em_atendimento {
+  color: var(--success);
+  background: rgba(23, 128, 61, 0.12);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn:disabled:hover {
+  transform: none;
+}
