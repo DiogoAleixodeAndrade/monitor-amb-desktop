@@ -1,11 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useQueue } from '../context/QueueContext.jsx';
 import { formatPanelTime, getPanelSectorLabel } from '../utils/panelUtils.js';
+import { playCallSound } from '../utils/soundUtils.js';
 
 export default function Painel() {
   const { currentCall, callQueue, lastCalls } = useQueue();
   const [clock, setClock] = useState(new Date());
+  const lastPlayedCallId = useRef(null);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -14,6 +16,28 @@ export default function Painel() {
 
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    async function playSoundForCurrentCall() {
+      if (!currentCall) {
+        return;
+      }
+
+      if (lastPlayedCallId.current === currentCall.idChamada) {
+        return;
+      }
+
+      lastPlayedCallId.current = currentCall.idChamada;
+
+      try {
+        await playCallSound();
+      } catch {
+        console.warn('Não foi possível reproduzir o som de chamada.');
+      }
+    }
+
+    playSoundForCurrentCall();
+  }, [currentCall]);
 
   const hasCurrentCall = Boolean(currentCall);
 
@@ -49,18 +73,12 @@ export default function Painel() {
           {hasCurrentCall ? 'Paciente chamado' : 'Aguardando chamada'}
         </div>
 
-        <h1>
-          {hasCurrentCall
-            ? currentCall.nomePaciente
-            : 'AGUARDANDO CHAMADA'}
-        </h1>
+        <h1>{hasCurrentCall ? currentCall.nomePaciente : 'AGUARDANDO CHAMADA'}</h1>
 
         <div className="painel-destination-grid">
           <div className="painel-destination">
             <span>Destino</span>
-            <strong>
-              {hasCurrentCall ? currentCall.destino : '---'}
-            </strong>
+            <strong>{hasCurrentCall ? currentCall.destino : '---'}</strong>
           </div>
 
           <div className="painel-destination">

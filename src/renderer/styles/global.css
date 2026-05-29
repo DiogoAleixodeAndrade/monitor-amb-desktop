@@ -1466,3 +1466,20 @@ button {
     padding: 80px 0;
   }
 }
+
+.open-panel-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.open-panel-box span {
+  max-width: 280px;
+  color: var(--gray-500);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.topbar-actions {
+  flex-wrap: wrap;
+}
