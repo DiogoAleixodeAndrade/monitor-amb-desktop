@@ -2,6 +2,11 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
 import { mockQueue } from '../data/mockQueue.js';
 import { priorities } from '../data/priorities.js';
+import {
+  checkInQueue,
+  listActiveQueue,
+  updateQueueStatus
+} from '../services/filaService.js';
 
 const QueueContext = createContext(null);
 
@@ -14,7 +19,19 @@ export function QueueProvider({ children }) {
   const [currentCall, setCurrentCall] = useState(null);
   const [lastCalls, setLastCalls] = useState([]);
 
-  function checkInPatient({
+  useEffect(() => {
+    async function loadAccessQueueIfAvailable() {
+      const result = await listActiveQueue();
+
+      if (result.success) {
+        setQueue(result.queue);
+      }
+    }
+
+    loadAccessQueueIfAvailable();
+  }, []);
+
+  async function checkInPatient({
     patient,
     profissional,
     especialidade,
@@ -58,33 +75,48 @@ export function QueueProvider({ children }) {
 
     setQueue((currentQueue) => [newQueueItem, ...currentQueue]);
 
+    const accessResult = await checkInQueue({
+      patient,
+      profissional,
+      especialidade,
+      prioridade: priorityData || null,
+      observacaoPrioridade,
+      usuarioResponsavel
+    });
+
+    if (accessResult.success) {
+      setQueue(accessResult.queue);
+    }
+
     return newQueueItem;
   }
 
-  function updateQueueItem(idFila, updates) {
+  async function updateQueueItem(idFila, updates) {
     setQueue((currentQueue) =>
       currentQueue.map((item) =>
         item.idFila === idFila
           ? {
-            ...item,
-            ...updates
-          }
+              ...item,
+              ...updates
+            }
           : item
       )
     );
+
+    const result = await updateQueueStatus({
+      idFila,
+      updates: convertUpdatesToAccessFields(updates)
+    });
+
+    if (result.success) {
+      setQueue(result.queue);
+    }
   }
 
-  function callPatient(patient, usuarioResponsavel) {
+  async function callPatient(patient, usuarioResponsavel) {
     const dataHoraChamada = new Date().toISOString();
 
-    const updatedPatient = {
-      ...patient,
-      statusAtendimento: 'CHAMADO',
-      dataHoraChamada,
-      usuarioResponsavel
-    };
-
-    updateQueueItem(patient.idFila, {
+    await updateQueueItem(patient.idFila, {
       statusAtendimento: 'CHAMADO',
       dataHoraChamada,
       usuarioResponsavel
@@ -103,37 +135,38 @@ export function QueueProvider({ children }) {
 
     setCallQueue((currentCalls) => [...currentCalls, newCall]);
 
-    return updatedPatient;
+    return {
+      ...patient,
+      statusAtendimento: 'CHAMADO',
+      dataHoraChamada,
+      usuarioResponsavel
+    };
   }
 
-  function confirmPresence(patient, usuarioResponsavel) {
-    updateQueueItem(patient.idFila, {
+  async function confirmPresence(patient, usuarioResponsavel) {
+    await updateQueueItem(patient.idFila, {
       statusAtendimento: 'EM_ATENDIMENTO',
       dataHoraApareceu: new Date().toISOString(),
       usuarioResponsavel
     });
   }
 
-  function registerAbsence(patient, usuarioResponsavel) {
-    setQueue((currentQueue) => {
-      return currentQueue.map((item) => {
-        if (item.idFila !== patient.idFila) {
-          return item;
-        }
-
-        return {
-          ...item,
-          statusAtendimento: 'NAO_COMPARECEU',
-          dataHoraChamada: null,
-          usuarioResponsavel,
-          ordem: currentQueue.length + 1
-        };
-      });
+  async function registerAbsence(patient, usuarioResponsavel) {
+    await updateQueueItem(patient.idFila, {
+      statusAtendimento: 'NAO_COMPARECEU',
+      dataHoraChamada: null,
+      usuarioResponsavel,
+      ordem: queue.length + 1
     });
   }
 
-  function forwardPatient(patient, setorDestino, usuarioResponsavel, observacao = '') {
-    updateQueueItem(patient.idFila, {
+  async function forwardPatient(
+    patient,
+    setorDestino,
+    usuarioResponsavel,
+    observacao = ''
+  ) {
+    await updateQueueItem(patient.idFila, {
       setorAtual: setorDestino,
       statusAtendimento: 'AGUARDANDO',
       dataHoraChamada: null,
@@ -144,16 +177,16 @@ export function QueueProvider({ children }) {
     });
   }
 
-  function finishPatient(patient, usuarioResponsavel) {
-    updateQueueItem(patient.idFila, {
+  async function finishPatient(patient, usuarioResponsavel) {
+    await updateQueueItem(patient.idFila, {
       statusAtendimento: 'FINALIZADO',
       dataHoraCheckout: new Date().toISOString(),
       usuarioResponsavel
     });
   }
 
-  function sendToEco(patient, usuarioResponsavel) {
-    updateQueueItem(patient.idFila, {
+  async function sendToEco(patient, usuarioResponsavel) {
+    await updateQueueItem(patient.idFila, {
       setorAtual: 'ECO',
       statusAtendimento: 'PAUSADO_ECO',
       tipoExame: 'ECO',
@@ -167,24 +200,24 @@ export function QueueProvider({ children }) {
     });
   }
 
-  function startEcoExam(patient, usuarioResponsavel) {
-    updateQueueItem(patient.idFila, {
+  async function startEcoExam(patient, usuarioResponsavel) {
+    await updateQueueItem(patient.idFila, {
       statusAtendimento: 'EM_ATENDIMENTO',
       dataHoraEcoInicio: new Date().toISOString(),
       usuarioResponsavel
     });
   }
 
-  function finishEcoExam(patient, usuarioResponsavel) {
-    updateQueueItem(patient.idFila, {
+  async function finishEcoExam(patient, usuarioResponsavel) {
+    await updateQueueItem(patient.idFila, {
       statusAtendimento: 'AGUARDANDO_RETORNO_ECO',
       dataHoraEcoRealizado: new Date().toISOString(),
       usuarioResponsavel
     });
   }
 
-  function returnFromEcoToDoctor(patient, usuarioResponsavel) {
-    updateQueueItem(patient.idFila, {
+  async function returnFromEcoToDoctor(patient, usuarioResponsavel) {
+    await updateQueueItem(patient.idFila, {
       setorAtual: 'MEDICO',
       statusAtendimento: 'AGUARDANDO_RETORNO_ECO',
       retornoExame: true,
@@ -270,6 +303,36 @@ export function useQueue() {
   }
 
   return context;
+}
+
+function convertUpdatesToAccessFields(updates) {
+  const fieldMap = {
+    setorAtual: 'SETOR_ATUAL',
+    statusAtendimento: 'STATUS_ATENDIMENTO',
+    dataHoraChamada: 'DATA_HORA_CHAMADA',
+    dataHoraApareceu: 'DATA_HORA_APARECEU',
+    dataHoraPausa: 'DATA_HORA_PAUSA',
+    dataHoraRetorno: 'DATA_HORA_RETORNO',
+    dataHoraCheckout: 'DATA_HORA_CHECKOUT',
+    dataHoraEcoInicio: 'DATA_HORA_ECO_INICIO',
+    dataHoraEcoRealizado: 'DATA_HORA_ECO_REALIZADO',
+    retornoExame: 'RETORNO_EXAME',
+    tipoExame: 'TIPO_EXAME',
+    motivoPausa: 'MOTIVO_PAUSA',
+    observacaoEncaminhamento: 'OBSERVACAO_ENCAMINHAMENTO',
+    usuarioResponsavel: 'USUARIO_RESPONSAVEL',
+    ordem: 'ORDEM'
+  };
+
+  return Object.entries(updates).reduce((acc, [key, value]) => {
+    const accessField = fieldMap[key];
+
+    if (accessField) {
+      acc[accessField] = value;
+    }
+
+    return acc;
+  }, {});
 }
 
 function getCallDestination(patient) {

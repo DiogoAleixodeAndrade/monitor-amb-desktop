@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { mockUsers } from '../data/mockUsers.js';
+
+import { loginUser } from '../services/authService.js';
 
 const AuthContext = createContext(null);
 
@@ -27,36 +28,17 @@ export function AuthProvider({ children }) {
     setLoadingSession(false);
   }, []);
 
-  function login(usuario, senha, lembrarUsuario = true) {
-    const normalizedUser = usuario.trim().toLowerCase();
+  async function login(usuario, senha, lembrarUsuario = true) {
+    const result = await loginUser({
+      usuario,
+      senha
+    });
 
-    const foundUser = mockUsers.find(
-      (item) =>
-        item.usuario.toLowerCase() === normalizedUser && item.senha === senha
-    );
-
-    if (!foundUser) {
-      return {
-        success: false,
-        message: 'Usuário ou senha inválidos.'
-      };
+    if (!result.success) {
+      return result;
     }
 
-    if (!foundUser.ativo) {
-      return {
-        success: false,
-        message: 'Usuário inativo. Procure a administração.'
-      };
-    }
-
-    const sessionUser = {
-      id: foundUser.id,
-      nome: foundUser.nome,
-      usuario: foundUser.usuario,
-      perfil: foundUser.perfil,
-      ativo: foundUser.ativo,
-      medicoVinculado: foundUser.medicoVinculado
-    };
+    const sessionUser = result.user;
 
     setUser(sessionUser);
 

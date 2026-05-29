@@ -46,8 +46,7 @@ export default function QueueBoard({
     subtitle: '',
     message: '',
     confirmLabel: 'Confirmar',
-    variant: 'primary',
-    extra: null
+    variant: 'primary'
   });
 
   const orderedPatients = useMemo(() => sortQueue(patients), [patients]);
@@ -61,8 +60,7 @@ export default function QueueBoard({
       subtitle: '',
       message: '',
       confirmLabel: 'Confirmar',
-      variant: 'primary',
-      extra: null
+      variant: 'primary'
     });
   }
 
@@ -75,8 +73,7 @@ export default function QueueBoard({
       subtitle: config.subtitle,
       message: config.message,
       confirmLabel: config.confirmLabel || 'Confirmar',
-      variant: config.variant || 'primary',
-      extra: config.extra || null
+      variant: config.variant || 'primary'
     });
   }
 
@@ -100,16 +97,16 @@ export default function QueueBoard({
     executeCall(patient);
   }
 
-  function executeCall(patient) {
-    callPatient(patient, user?.usuario);
+  async function executeCall(patient) {
+    await callPatient(patient, user?.usuario);
 
     setLastAction(
       `Chamada registrada para ${patient.nomeSocial || patient.nomePaciente}.`
     );
   }
 
-  function handleAppeared(patient) {
-    confirmPresence(patient, user?.usuario);
+  async function handleAppeared(patient) {
+    await confirmPresence(patient, user?.usuario);
 
     setLastAction(
       `${patient.nomeSocial || patient.nomePaciente} está em atendimento.`
@@ -122,15 +119,16 @@ export default function QueueBoard({
       patient,
       title: 'Registrar ausência?',
       subtitle: 'Confirme antes de alterar a posição na fila.',
-      message: `Deseja registrar ausência de ${patient.nomeSocial || patient.nomePaciente
-        }? O paciente ficará marcado como ausente e poderá ser chamado novamente depois.`,
+      message: `Deseja registrar ausência de ${
+        patient.nomeSocial || patient.nomePaciente
+      }? O paciente ficará marcado como ausente e poderá ser chamado novamente depois.`,
       confirmLabel: 'Registrar ausência',
       variant: 'warning'
     });
   }
 
-  function executeMissing(patient) {
-    registerAbsence(patient, user?.usuario);
+  async function executeMissing(patient) {
+    await registerAbsence(patient, user?.usuario);
 
     setLastAction(
       `${patient.nomeSocial || patient.nomePaciente} foi registrado como ausente.`
@@ -150,15 +148,16 @@ export default function QueueBoard({
       patient,
       title: 'Finalizar atendimento?',
       subtitle: 'Essa ação remove o paciente da fila ativa.',
-      message: `Deseja finalizar o atendimento de ${patient.nomeSocial || patient.nomePaciente
-        }?`,
+      message: `Deseja finalizar o atendimento de ${
+        patient.nomeSocial || patient.nomePaciente
+      }?`,
       confirmLabel: 'Finalizar atendimento',
       variant: 'danger'
     });
   }
 
-  function executeFinish(patient) {
-    finishPatient(patient, user?.usuario);
+  async function executeFinish(patient) {
+    await finishPatient(patient, user?.usuario);
 
     setLastAction(
       `Atendimento finalizado para ${patient.nomeSocial || patient.nomePaciente}.`
@@ -175,23 +174,42 @@ export default function QueueBoard({
     setForwardModalOpen(false);
   }
 
-  if (setorDestino === 'FINALIZAR') {
-    const finishValidation = canFinishAttendance(patient);
-
-    if (!finishValidation.allowed) {
-      setLastAction(finishValidation.message);
+  async function handleConfirmForward({ patient, setorDestino, observacao }) {
+    if (!patient) {
       handleCloseForwardModal();
       return;
     }
 
-    finishPatient(patient, user?.usuario);
+    if (setorDestino === 'FINALIZAR') {
+      const finishValidation = canFinishAttendance(patient);
+
+      if (!finishValidation.allowed) {
+        setLastAction(finishValidation.message);
+        handleCloseForwardModal();
+        return;
+      }
+
+      await finishPatient(patient, user?.usuario);
+
+      setLastAction(
+        `Atendimento finalizado para ${
+          patient.nomeSocial || patient.nomePaciente
+        }.`
+      );
+
+      handleCloseForwardModal();
+      return;
+    }
+
+    await forwardPatient(patient, setorDestino, user?.usuario, observacao);
 
     setLastAction(
-      `Atendimento finalizado para ${patient.nomeSocial || patient.nomePaciente}.`
+      `${patient.nomeSocial || patient.nomePaciente} encaminhado para ${
+        sectorLabels[setorDestino] || setorDestino
+      }.`
     );
 
     handleCloseForwardModal();
-    return;
   }
 
   function handleSendToEco(patient) {
@@ -200,46 +218,47 @@ export default function QueueBoard({
       patient,
       title: 'Enviar para ECO?',
       subtitle: 'O atendimento médico ficará pausado.',
-      message: `Deseja enviar ${patient.nomeSocial || patient.nomePaciente
-        } para ECO e pausar o atendimento até o retorno do exame?`,
+      message: `Deseja enviar ${
+        patient.nomeSocial || patient.nomePaciente
+      } para ECO e pausar o atendimento até o retorno do exame?`,
       confirmLabel: 'Enviar para ECO',
       variant: 'eco'
     });
   }
 
-  function executeSendToEco(patient) {
-    sendToEco(patient, user?.usuario);
+  async function executeSendToEco(patient) {
+    await sendToEco(patient, user?.usuario);
 
     setLastAction(
       `${patient.nomeSocial || patient.nomePaciente} foi enviado para ECO. Atendimento pausado.`
     );
   }
 
-  function handleStartEco(patient) {
-    startEcoExam(patient, user?.usuario);
+  async function handleStartEco(patient) {
+    await startEcoExam(patient, user?.usuario);
 
     setLastAction(
       `ECO iniciado para ${patient.nomeSocial || patient.nomePaciente}.`
     );
   }
 
-  function handleFinishEco(patient) {
-    finishEcoExam(patient, user?.usuario);
+  async function handleFinishEco(patient) {
+    await finishEcoExam(patient, user?.usuario);
 
     setLastAction(
       `ECO realizado para ${patient.nomeSocial || patient.nomePaciente}.`
     );
   }
 
-  function handleReturnFromEco(patient) {
-    returnFromEcoToDoctor(patient, user?.usuario);
+  async function handleReturnFromEco(patient) {
+    await returnFromEcoToDoctor(patient, user?.usuario);
 
     setLastAction(
       `${patient.nomeSocial || patient.nomePaciente} retornou para a fila do médico ${patient.nomeMedicoDestino}.`
     );
   }
 
-  function handleConfirmAction() {
+  async function handleConfirmAction() {
     const { type, patient } = confirmState;
 
     if (!patient) {
@@ -248,19 +267,19 @@ export default function QueueBoard({
     }
 
     if (type === 'CALL_OUT_OF_ORDER') {
-      executeCall(patient);
+      await executeCall(patient);
     }
 
     if (type === 'MISSING') {
-      executeMissing(patient);
+      await executeMissing(patient);
     }
 
     if (type === 'FINISH') {
-      executeFinish(patient);
+      await executeFinish(patient);
     }
 
     if (type === 'SEND_ECO') {
-      executeSendToEco(patient);
+      await executeSendToEco(patient);
     }
 
     closeConfirmModal();

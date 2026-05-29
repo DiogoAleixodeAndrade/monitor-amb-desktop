@@ -1,12 +1,12 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import AppShell from '../components/AppShell.jsx';
 import Button from '../components/Button.jsx';
 import Input from '../components/Input.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useQueue } from '../context/QueueContext.jsx';
-import { mockPatients } from '../data/mockPatients.js';
-import { mockProfessionals } from '../data/mockProfessionals.js';
+import { createPatient, findPatientByCns } from '../services/pacientesService.js';
+import { listProfessionals } from '../services/profissionaisService.js';
 import { priorities } from '../data/priorities.js';
 
 const emptyPatient = {
@@ -21,6 +21,7 @@ const emptyPatient = {
 export default function Recepcao() {
   const { user } = useAuth();
   const { checkInPatient } = useQueue();
+  const [professionals, setProfessionals] = useState([]);
 
   const [cnsBusca, setCnsBusca] = useState('');
   const [patient, setPatient] = useState(emptyPatient);
@@ -33,15 +34,27 @@ export default function Recepcao() {
   const [observacaoPrioridade, setObservacaoPrioridade] = useState('');
   const [feedback, setFeedback] = useState('');
 
+  useEffect(() => {
+    async function loadProfessionals() {
+      const result = await listProfessionals();
+
+      if (result.success) {
+        setProfessionals(result.professionals);
+      }
+    }
+
+    loadProfessionals();
+  }, []);
+
   const selectedProfessional = useMemo(() => {
-    return mockProfessionals.find(
+    return professionals.find(
       (item) => String(item.idProfissional) === String(idProfissional)
     );
   }, [idProfissional]);
 
   const availableSpecialties = selectedProfessional?.especialidades || [];
 
-  function handleSearchPatient(event) {
+  async function handleSearchPatient(event) {
     event.preventDefault();
     setFeedback('');
 
@@ -52,12 +65,15 @@ export default function Recepcao() {
       return;
     }
 
-    const foundPatient = mockPatients.find(
-      (item) => item.cns === normalizedCns
-    );
+    const result = await findPatientByCns(normalizedCns);
 
-    if (foundPatient) {
-      setPatient(foundPatient);
+    if (!result.success) {
+      setFeedback(result.message || 'Erro ao pesquisar paciente.');
+      return;
+    }
+
+    if (result.patient) {
+      setPatient(result.patient);
       setPacienteEncontrado(true);
       setModoCadastro(false);
       setFeedback('Paciente encontrado. Confira os dados antes do check-in.');
@@ -70,7 +86,7 @@ export default function Recepcao() {
     });
     setPacienteEncontrado(false);
     setModoCadastro(true);
-    setFeedback('Paciente não encontrado. Preencha o cadastro para continuar.');
+    setFeedback('Paciente não localizado na base interna. Cadastre para continuar.');
   }
 
   function handleProfessionalChange(event) {
@@ -96,7 +112,28 @@ export default function Recepcao() {
     }));
   }
 
-  function handleCheckIn(event) {
+  async function handleCreatePatient() {
+    setFeedback('');
+
+    if (!patient.cns || !patient.nomePaciente || !patient.prontuario) {
+      setFeedback('Preencha CNS, nome do paciente e prontuário para cadastrar.');
+      return;
+    }
+
+    const result = await createPatient(patient);
+
+    if (!result.success) {
+      setFeedback(result.message || 'Erro ao cadastrar paciente.');
+      return;
+    }
+
+    setPatient(result.patient);
+    setPacienteEncontrado(true);
+    setModoCadastro(false);
+    setFeedback('Paciente cadastrado com sucesso. Agora realize o check-in.');
+  }
+
+  async function handleCheckIn(event) {
     event.preventDefault();
     setFeedback('');
 
@@ -115,7 +152,7 @@ export default function Recepcao() {
       return;
     }
 
-    checkInPatient({
+    await checkInPatient({
       patient,
       profissional: selectedProfessional,
       especialidade,
@@ -238,7 +275,7 @@ export default function Recepcao() {
                 <select value={idProfissional} onChange={handleProfessionalChange}>
                   <option value="">Selecione o profissional</option>
 
-                  {mockProfessionals.map((professional) => (
+                  {professionals.map((professional) => (
                     <option
                       key={professional.idProfissional}
                       value={professional.idProfissional}
@@ -321,7 +358,15 @@ export default function Recepcao() {
             </div>
 
             <div className="form-actions">
-              <Button type="submit">Realizar check-in</Button>
+              {modoCadastro && !pacienteEncontrado && (
+                <Button type="button" variant="secondary" onClick={handleCreatePatient}>
+                  Cadastrar paciente
+                </Button>
+              )}
+
+              <Button type="submit" disabled={modoCadastro && !pacienteEncontrado}>
+                Realizar check-in
+              </Button>
             </div>
           </form>
         </section>

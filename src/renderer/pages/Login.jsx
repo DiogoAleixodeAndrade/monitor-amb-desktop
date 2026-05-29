@@ -15,11 +15,11 @@ export default function Login({ appInfo }) {
   const [lembrarUsuario, setLembrarUsuario] = useState(true);
   const [error, setError] = useState('');
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     setError('');
 
-    const result = login(usuario, senha, lembrarUsuario);
+    const result = await login(usuario, senha, lembrarUsuario);
 
     if (!result.success) {
       setError(result.message);
