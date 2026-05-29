@@ -1,25 +1,16 @@
-export default function AppShell({ children }) {
+import Header from './Header.jsx';
+import Sidebar from './Sidebar.jsx';
+
+export default function AppShell({ title, subtitle, children }) {
   return (
     <div className="app-shell">
-      <aside className="sidebar">
-        <div className="sidebar-brand">
-          <div className="mini-logo">+</div>
-          <div>
-            <strong>Monitor Amb</strong>
-            <span>IECAC</span>
-          </div>
-        </div>
+      <Sidebar />
 
-        <nav className="sidebar-nav">
-          <button>Dashboard</button>
-          <button>Recepção</button>
-          <button>Acolhimento</button>
-          <button>Médico</button>
-          <button>Painel</button>
-        </nav>
-      </aside>
+      <main className="content-area">
+        <Header title={title} subtitle={subtitle} />
 
-      <section className="content-area">{children}</section>
+        <section className="page-content">{children}</section>
+      </main>
     </div>
   );
 }

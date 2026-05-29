@@ -1,19 +1,32 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import Button from '../components/Button.jsx';
 import Input from '../components/Input.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
+import { getHomeByRole } from '../utils/redirectByRole.js';
 
 export default function Login({ appInfo }) {
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
   const [usuario, setUsuario] = useState('');
   const [senha, setSenha] = useState('');
   const [lembrarUsuario, setLembrarUsuario] = useState(true);
+  const [error, setError] = useState('');
 
   function handleSubmit(event) {
     event.preventDefault();
+    setError('');
 
-    alert(
-      `Próxima etapa: autenticar usuário "${usuario}" no banco Access com hash de senha.`
-    );
+    const result = login(usuario, senha, lembrarUsuario);
+
+    if (!result.success) {
+      setError(result.message);
+      return;
+    }
+
+    navigate(getHomeByRole(result.user.perfil), { replace: true });
   }
 
   return (
@@ -87,6 +100,8 @@ export default function Login({ appInfo }) {
             autoComplete="current-password"
           />
 
+          {error && <div className="form-error">{error}</div>}
+
           <label className="check-row">
             <input
               type="checkbox"
@@ -97,6 +112,15 @@ export default function Login({ appInfo }) {
           </label>
 
           <Button type="submit">Entrar no sistema</Button>
+
+          <div className="login-helper">
+            <strong>Usuários de teste:</strong>
+            <span>admin / 123</span>
+            <span>recepcao / 123</span>
+            <span>joao.silva / 123</span>
+            <span>painel / 123</span>
+            <span>mapa.cirurgico / 123</span>
+          </div>
 
           <div className="login-footer">
             <span>{appInfo?.institution || 'IECAC'}</span>
