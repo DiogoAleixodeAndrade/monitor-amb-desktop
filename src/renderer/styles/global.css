@@ -2302,3 +2302,12 @@ button {
     grid-template-columns: 1fr;
   }
 }
+
+.report-export-feedback {
+  padding: 14px 18px;
+  border-radius: 18px;
+  color: var(--success);
+  background: rgba(23, 128, 61, 0.08);
+  border: 1px solid rgba(23, 128, 61, 0.16);
+  font-weight: 800;
+}

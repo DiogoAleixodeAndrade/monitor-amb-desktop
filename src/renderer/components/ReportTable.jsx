@@ -1,6 +1,11 @@
 import { useMemo, useState } from 'react';
 
 import { dashboardSectorLabels } from '../utils/dashboardAnalytics.js';
+import {
+  buildAttendanceExportRows,
+  exportRowsToCsv,
+  generateReportFilename
+} from '../utils/exportUtils.js';
 import { formatDateTime } from '../utils/queueRules.js';
 import StatusBadge from './StatusBadge.jsx';
 
@@ -17,6 +22,7 @@ const statusLabels = {
 
 export default function ReportTable({ data }) {
   const [search, setSearch] = useState('');
+  const [exportFeedback, setExportFeedback] = useState('');
 
   const filteredRows = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
@@ -66,9 +72,16 @@ export default function ReportTable({ data }) {
   ).length;
 
   function handleExportClick() {
-    alert(
-      'Na próxima etapa vamos preparar exportação para Excel/CSV e depois PDF.'
+    setExportFeedback('');
+
+    const rows = buildAttendanceExportRows(filteredRows);
+
+    const result = exportRowsToCsv(
+      rows,
+      generateReportFilename('relatorio-atendimentos-monitor-amb')
     );
+
+    setExportFeedback(result.message);
   }
 
   return (
@@ -83,9 +96,13 @@ export default function ReportTable({ data }) {
         </div>
 
         <button className="report-export-button" onClick={handleExportClick}>
-          Exportar relatório
+          Exportar CSV
         </button>
       </header>
+
+      {exportFeedback && (
+        <div className="report-export-feedback">{exportFeedback}</div>
+      )}
 
       <div className="report-toolbar">
         <label className="field report-search">
@@ -157,7 +174,9 @@ export default function ReportTable({ data }) {
 
                   <td>{item.cns || '-'}</td>
 
-                  <td>{dashboardSectorLabels[item.setorAtual] || item.setorAtual}</td>
+                  <td>
+                    {dashboardSectorLabels[item.setorAtual] || item.setorAtual}
+                  </td>
 
                   <td>{item.nomeMedicoDestino || '-'}</td>
 
