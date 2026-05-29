@@ -1083,3 +1083,193 @@ button {
     justify-content: flex-start;
   }
 }
+
+.reception-grid {
+  display: grid;
+  grid-template-columns: 0.82fr 1.18fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.search-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 14px;
+  align-items: end;
+}
+
+.search-row .btn {
+  width: auto;
+  min-width: 180px;
+  margin-bottom: 18px;
+}
+
+.quick-cns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 8px 0 18px;
+  padding: 14px;
+  border-radius: 18px;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-100);
+}
+
+.quick-cns strong {
+  width: 100%;
+  color: var(--gray-700);
+  font-size: 0.85rem;
+}
+
+.quick-cns button {
+  min-height: 34px;
+  border: 1px solid var(--gray-200);
+  border-radius: 999px;
+  padding: 0 12px;
+  color: var(--iecac-blue-800);
+  background: var(--white);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.patient-form {
+  display: grid;
+  gap: 18px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.field select,
+.field textarea {
+  width: 100%;
+  border: 1px solid var(--gray-200);
+  border-radius: 16px;
+  padding: 0 16px;
+  outline: none;
+  color: var(--gray-900);
+  background: var(--gray-50);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.field select {
+  height: 52px;
+}
+
+.field textarea {
+  min-height: 112px;
+  padding-top: 14px;
+  resize: vertical;
+}
+
+.field select:focus,
+.field textarea:focus {
+  border-color: rgba(19, 104, 200, 0.55);
+  background: var(--white);
+  box-shadow: 0 0 0 4px rgba(19, 104, 200, 0.12);
+}
+
+.field select:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.checkin-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  padding: 14px;
+  border-radius: 22px;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-100);
+}
+
+.checkin-summary div {
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--white);
+  border: 1px solid var(--gray-100);
+}
+
+.checkin-summary span,
+.checkin-summary strong {
+  display: block;
+}
+
+.checkin-summary span {
+  margin-bottom: 6px;
+  color: var(--gray-500);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.checkin-summary strong {
+  color: var(--iecac-blue-900);
+  font-size: 0.92rem;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.form-actions .btn {
+  width: auto;
+  min-width: 210px;
+  padding: 0 22px;
+}
+
+.patient-actions .btn {
+  min-height: 50px;
+  font-size: 0.88rem;
+}
+
+.patient-actions .btn-primary {
+  min-width: 148px;
+}
+
+.patient-actions .btn-success {
+  min-width: 172px;
+}
+
+.patient-actions .btn-warning {
+  min-width: 160px;
+}
+
+.patient-actions .btn-secondary {
+  min-width: 178px;
+}
+
+.patient-actions .btn-danger {
+  min-width: 186px;
+}
+
+@media (max-width: 1280px) {
+  .reception-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .checkin-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .form-grid,
+  .checkin-summary,
+  .search-row {
+    grid-template-columns: 1fr;
+  }
+
+  .search-row .btn {
+    width: 100%;
+    margin-bottom: 0;
+  }
+}

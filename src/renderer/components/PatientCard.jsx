@@ -16,9 +16,8 @@ export default function PatientCard({
 
   return (
     <article
-      className={`patient-card ${
-        patient.prioritario ? 'patient-priority' : ''
-      } ${patient.retornoExame ? 'patient-eco-return' : ''}`}
+      className={`patient-card ${patient.prioritario ? 'patient-priority' : ''
+        } ${patient.retornoExame ? 'patient-eco-return' : ''}`}
     >
       <div className="patient-position">
         <span>{position}</span>
@@ -70,22 +69,22 @@ export default function PatientCard({
         )}
 
         <div className="patient-actions">
-          <Button onClick={() => onCall(patient)}>Chamar</Button>
+          <Button onClick={() => onCall(patient)}>Chamar paciente</Button>
 
           <Button variant="success" onClick={() => onAppeared(patient)}>
-            Apareceu
+            Confirmar presença
           </Button>
 
           <Button variant="warning" onClick={() => onMissing(patient)}>
-            Não apareceu
+            Registrar ausência
           </Button>
 
           <Button variant="secondary" onClick={() => onForward(patient)}>
-            Encaminhar
+            Encaminhar paciente
           </Button>
 
           <Button variant="danger" onClick={() => onCheckout(patient)}>
-            Check-out
+            Finalizar atendimento
           </Button>
         </div>
       </div>

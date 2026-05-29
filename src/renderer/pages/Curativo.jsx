@@ -1,10 +1,12 @@
 import AppShell from '../components/AppShell.jsx';
 import QueueBoard from '../components/QueueBoard.jsx';
-import { mockQueue } from '../data/mockQueue.js';
+import { useQueue } from '../context/QueueContext.jsx';
 import { filterQueueBySector } from '../utils/queueRules.js';
 
 export default function Curativo() {
-  const patients = filterQueueBySector(mockQueue, 'CURATIVO');
+  const { queue } = useQueue();
+
+  const patients = filterQueueBySector(queue, 'CURATIVO');
 
   return (
     <AppShell
@@ -18,4 +20,4 @@ export default function Curativo() {
       />
     </AppShell>
   );
-}code src/renderer/pages/ECO.jsx
+}

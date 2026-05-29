@@ -1,10 +1,12 @@
 import AppShell from '../components/AppShell.jsx';
 import QueueBoard from '../components/QueueBoard.jsx';
-import { mockQueue } from '../data/mockQueue.js';
+import { useQueue } from '../context/QueueContext.jsx';
 import { filterQueueBySector } from '../utils/queueRules.js';
 
 export default function Medicacao() {
-  const patients = filterQueueBySector(mockQueue, 'MEDICACAO');
+  const { queue } = useQueue();
+
+  const patients = filterQueueBySector(queue, 'MEDICACAO');
 
   return (
     <AppShell

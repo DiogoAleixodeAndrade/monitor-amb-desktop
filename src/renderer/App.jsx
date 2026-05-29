@@ -3,6 +3,7 @@ import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import { AuthProvider } from './context/AuthContext.jsx';
 import ProtectedRoute from './routes/ProtectedRoute.jsx';
+import { QueueProvider } from './context/QueueContext.jsx';
 
 import Splash from './pages/Splash.jsx';
 import Login from './pages/Login.jsx';
@@ -42,113 +43,115 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <HashRouter>
-        <Routes>
-          <Route path="/" element={<Splash appInfo={appInfo} />} />
-          <Route path="/login" element={<Login appInfo={appInfo} />} />
+      <QueueProvider>
+        <HashRouter>
+          <Routes>
+            <Route path="/" element={<Splash appInfo={appInfo} />} />
+            <Route path="/login" element={<Login appInfo={appInfo} />} />
 
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute permission="DASHBOARD">
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute permission="DASHBOARD">
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/recepcao"
-            element={
-              <ProtectedRoute permission="RECEPCAO">
-                <Recepcao />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/recepcao"
+              element={
+                <ProtectedRoute permission="RECEPCAO">
+                  <Recepcao />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/acolhimento"
-            element={
-              <ProtectedRoute permission="ACOLHIMENTO">
-                <Acolhimento />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/acolhimento"
+              element={
+                <ProtectedRoute permission="ACOLHIMENTO">
+                  <Acolhimento />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/medico"
-            element={
-              <ProtectedRoute permission="MEDICO">
-                <Medico />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/medico"
+              element={
+                <ProtectedRoute permission="MEDICO">
+                  <Medico />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/ecg"
-            element={
-              <ProtectedRoute permission="ECG">
-                <ECG />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/ecg"
+              element={
+                <ProtectedRoute permission="ECG">
+                  <ECG />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/medicacao"
-            element={
-              <ProtectedRoute permission="MEDICACAO">
-                <Medicacao />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/medicacao"
+              element={
+                <ProtectedRoute permission="MEDICACAO">
+                  <Medicacao />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/curativo"
-            element={
-              <ProtectedRoute permission="CURATIVO">
-                <Curativo />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/curativo"
+              element={
+                <ProtectedRoute permission="CURATIVO">
+                  <Curativo />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/eco"
-            element={
-              <ProtectedRoute permission="ECO">
-                <ECO />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/eco"
+              element={
+                <ProtectedRoute permission="ECO">
+                  <ECO />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/mapa-cirurgico"
-            element={
-              <ProtectedRoute permission="MAPA_CIRURGICO">
-                <MapaCirurgico />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/mapa-cirurgico"
+              element={
+                <ProtectedRoute permission="MAPA_CIRURGICO">
+                  <MapaCirurgico />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/painel"
-            element={
-              <ProtectedRoute permission="PAINEL">
-                <Painel />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/painel"
+              element={
+                <ProtectedRoute permission="PAINEL">
+                  <Painel />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute permission="ADMIN">
-                <Admin />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute permission="ADMIN">
+                  <Admin />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </HashRouter>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </HashRouter>
+      </QueueProvider>
     </AuthProvider>
   );
 }
